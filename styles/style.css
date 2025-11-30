@@ -465,3 +465,20 @@ tbody tr:hover {
     gap: 1rem;
     margin-top: 1.5rem;
 }
+.public-access {
+    text-align: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.btn-public {
+    background: transparent;
+    border: 2px solid var(--success);
+    color: var(--success);
+}
+
+.btn-public:hover {
+    background: var(--success);
+    color: white;
+}

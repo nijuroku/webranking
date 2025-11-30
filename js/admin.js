@@ -28,8 +28,8 @@ class AdminManager {
     }
 
     async crearAdministrador(usuario, password, nombreCompleto, nivelAcceso) {
-        if (!window.authManager.hasAccess(2)) {
-            window.authManager.showNotification('No tienes permisos para crear administradores', 'error');
+        if (!window.authManager.hasAccess(1)) {
+            window.authManager.showNotification('No tienes permisos para esta acción', 'error');
             return false;
         }
 
@@ -108,8 +108,8 @@ class AdminManager {
     }
 
     async eliminarAdministrador(adminId) {
-        if (!window.authManager.hasAccess(2)) {
-            window.authManager.showNotification('No tienes permisos para eliminar administradores', 'error');
+        if (!window.authManager.hasAccess(1)) {
+            window.authManager.showNotification('No tienes permisos para esta acción', 'error');
             return false;
         }
 

@@ -17,13 +17,7 @@
             <p>Cargando Sistema de Clasificación...</p>
         </div>
     </div>
-     <div class="public-access">
-        <p>¿Solo quieres ver los rankings?</p>
-            <button id="publicAccessBtn" class="btn btn-public btn-large">
-                <i class="fas fa-eye"></i> Acceder como Público
-            </button>
-    </div>
-    
+
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
@@ -50,6 +44,12 @@
                     <p><i class="fas fa-info-circle"></i> Contacta al administrador para crear tu cuenta</p>
                 </div>
             </form>
+            <div class="public-access">
+                <p>¿Solo quieres ver los rankings?</p>
+                <button id="publicAccessBtn" class="btn btn-public btn-large">
+                    <i class="fas fa-eye"></i> Acceder como Público
+                </button>
+            </div>
         </div>
     </div>
 
@@ -458,24 +458,4 @@
     <script src="js/equipos.js"></script>
     <script src="js/admin.js"></script>
 </body>
-<css>
-    /* En styles/style.css */
-    .public-access {
-        text-align: center;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--border);
-    }
-
-    .btn-public {
-        background: transparent;
-        border: 2px solid var(--success);
-        color: var(--success);
-    }
-
-    .btn-public:hover {
-        background: var(--success);
-        color: white;
-    }
-</css>
 </html>

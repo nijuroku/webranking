@@ -46,7 +46,7 @@ class EquipoManager {
 
     async crearEquipo(nombre, tag) {
         if (!window.authManager.hasAccess(1)) {
-            window.authManager.showNotification('No tienes permisos para crear equipos', 'error');
+            window.authManager.showNotification('No tienes permisos para esta acción', 'error');
             return false;
         }
 
@@ -85,7 +85,7 @@ class EquipoManager {
 
     async eliminarEquipo(equipoId) {
         if (!window.authManager.hasAccess(1)) {
-            window.authManager.showNotification('No tienes permisos para eliminar equipos', 'error');
+            window.authManager.showNotification('No tienes permisos para esta acción', 'error');
             return false;
         }
 

@@ -86,7 +86,7 @@ class UsuarioManager {
 
     async sumarPuntosMain(usuarioId, puntos) {
         if (!window.authManager.hasAccess(1)) {
-            window.authManager.showNotification('No tienes permisos para sumar puntos', 'error');
+            window.authManager.showNotification('No tienes permisos para esta acción', 'error');
             return false;
         }
 
@@ -204,7 +204,7 @@ class UsuarioManager {
 
     async guardarCambiosUsuario(usuarioId, nuevosDatos) {
         if (!window.authManager.hasAccess(1)) {
-            window.authManager.showNotification('No tienes permisos para modificar usuarios', 'error');
+            window.authManager.showNotification('No tienes permisos para esta acción', 'error');
             return false;
         }
 
@@ -329,6 +329,10 @@ class UsuarioManager {
                 // Recargar datos del usuario
                 this.cargarUsuarioGestion(usuarioId);
             }
+            if (!window.authManager.hasAccess(1)) {
+            window.authManager.showNotification('No tienes permisos para esta acción', 'error');
+            return false;
+        }
         });
 
         // Eliminar usuario
@@ -338,6 +342,10 @@ class UsuarioManager {
                 document.getElementById('selectUsuarioGestion').value = '';
                 document.getElementById('usuarioInfo').style.display = 'none';
             }
+            if (!window.authManager.hasAccess(1)) {
+            window.authManager.showNotification('No tienes permisos para esta acción', 'error');
+            return false;
+        }
         });
     }
 }
