@@ -1,42 +1,54 @@
 class AuthManager {
     constructor() {
         this.currentUser = null;
-        this.userLevel = 0;
+        this.userLevel = 0; // 0: Público, 1: Admin, 2: Super Admin
         this.init();
     }
 
     async init() {
-        await this.checkExistingSession();
-        this.setupEventListeners();
-    }
+    // Acceso público automático
+    this.accessAsPublic();
+    this.setupEventListeners();
+    
+    // Intentar cargar sesión de admin en segundo plano
+    this.checkExistingSession();
+}
 
     async checkExistingSession() {
         try {
-            const { data: { session }, error } = await window.supabaseClient.auth.getSession();
-            
-            if (error) throw error;
-            
-            if (session?.user) {
-                await this.validateAdminUser(session.user.email);
-            } else {
-                this.showLogin();
+            const savedSession = localStorage.getItem('adminSession');
+            if (savedSession) {
+                const session = JSON.parse(savedSession);
+                if (Date.now() - session.timestamp < 24 * 60 * 60 * 1000) {
+                    await this.validateAdminUser(session.usuario);
+                } else {
+                    localStorage.removeItem('adminSession');
+                }
             }
         } catch (error) {
             console.error('Error checking session:', error);
-            this.showLogin();
         }
     }
+        // Nuevo método para acceso público
+    accessAsPublic() {
+        this.currentUser = null;
+        this.userLevel = 0;
+        this.showMainApp();
+    }
 
-    async validateAdminUser(email) {
+    async validateAdminUser(usuario) {
         try {
+            console.log('Validando usuario:', usuario);
+            
             const { data: admin, error } = await window.supabaseClient
                 .from('administradores')
                 .select('*')
-                .eq('usuario', email)
+                .eq('usuario', usuario)
                 .eq('activo', true)
                 .single();
 
             if (error || !admin) {
+                console.error('Admin no encontrado o inactivo:', error);
                 this.showNotification('Usuario no autorizado', 'error');
                 await this.logout();
                 return;
@@ -46,6 +58,8 @@ class AuthManager {
             this.userLevel = admin.nivel_acceso;
             this.showMainApp();
             
+            console.log('Usuario validado correctamente:', admin.usuario);
+            
         } catch (error) {
             console.error('Error validating admin:', error);
             this.showLogin();
@@ -54,8 +68,9 @@ class AuthManager {
 
     async login(usuario, password) {
         try {
-            // Para Supabase, necesitamos usar el sistema de autenticación por email
-            // Pero como estamos usando tabla personalizada, hacemos la validación directa
+            console.log('Intentando login para:', usuario);
+            
+            // Primero, buscar el administrador en la base de datos
             const { data: admin, error } = await window.supabaseClient
                 .from('administradores')
                 .select('*')
@@ -64,13 +79,20 @@ class AuthManager {
                 .single();
 
             if (error || !admin) {
+                console.error('Admin no encontrado:', error);
                 this.showNotification('Usuario o contraseña incorrectos', 'error');
                 return false;
             }
 
+            console.log('Admin encontrado, verificando contraseña...');
+
             // Verificar contraseña (hash MD5)
             const passwordHash = await this.hashPassword(password);
+            console.log('Hash ingresado:', passwordHash);
+            console.log('Hash en BD:', admin.password_hash);
+            
             if (passwordHash !== admin.password_hash) {
+                console.error('Contraseña incorrecta');
                 this.showNotification('Usuario o contraseña incorrectos', 'error');
                 return false;
             }
@@ -78,7 +100,7 @@ class AuthManager {
             this.currentUser = admin;
             this.userLevel = admin.nivel_acceso;
             
-            // Crear sesión en localStorage
+            // Guardar sesión en localStorage
             localStorage.setItem('adminSession', JSON.stringify({
                 usuario: admin.usuario,
                 nivel: admin.nivel_acceso,
@@ -97,12 +119,13 @@ class AuthManager {
     }
 
     async hashPassword(password) {
-        // Usar Web Crypto API para hash (más seguro que MD5, pero compatible con lo existente)
+        // Usar SHA-256 que SÍ está soportado
         const encoder = new TextEncoder();
         const data = encoder.encode(password);
-        const hashBuffer = await crypto.subtle.digest('MD5', data);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
     }
 
     async logout() {
@@ -123,30 +146,61 @@ class AuthManager {
         document.getElementById('loginModal').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         this.updateUI();
+        
+        // Cargar datos iniciales
+        setTimeout(() => {
+            if (window.rankingManager) window.rankingManager.loadRankingMain();
+            if (window.rankingManager) window.rankingManager.loadRankingExtra();
+            if (window.equipoManager) window.equipoManager.loadEquipos();
+        }, 500);
     }
 
     updateUI() {
-        // Actualizar información del usuario
-        document.getElementById('userName').textContent = this.currentUser.nombre_completo || this.currentUser.usuario;
         
-        const badge = document.getElementById('userBadge');
-        badge.textContent = this.userLevel >= 2 ? 'Super Admin' : 'Admin';
-        badge.style.background = this.userLevel >= 2 ? '#e74c3c' : '#3498db';
-
-        // Mostrar/ocultar pestañas de admin
+        const userInfo = document.getElementById('userInfo');
+        const logoutBtn = document.getElementById('logoutBtn');
         const adminTabs = document.getElementById('adminTabs');
-        if (this.userLevel >= 2) {
-            adminTabs.style.display = 'block';
-        } else {
+        
+        if (this.userLevel === 0) {
+            // Modo público
+            userInfo.innerHTML = '<span>👤 Modo Público</span>';
+            logoutBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
             adminTabs.style.display = 'none';
-            // Si está en una pestaña admin, redirigir a ranking
-            const currentTab = document.querySelector('.tab-content.active').id;
-            if (currentTab === 'administradores' || currentTab === 'gestion-usuarios') {
-                this.switchTab('ranking-main');
+            
+            // Ocultar pestañas de administración
+            this.hideAdminTabs();
+        } else {
+            // Modo administrador
+            document.getElementById('userName').textContent = this.currentUser.nombre_completo || this.currentUser.usuario;
+            
+            const badge = document.getElementById('userBadge');
+            badge.textContent = this.userLevel >= 2 ? 'Super Admin' : 'Admin';
+            badge.style.background = this.userLevel >= 2 ? '#e74c3c' : '#3498db';
+            
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Cerrar Sesión';
+            
+            // Mostrar pestañas de admin según nivel
+            if (this.userLevel >= 2) {
+                adminTabs.style.display = 'block';
+            } else {
+                adminTabs.style.display = 'none';
             }
         }
     }
-
+    hideAdminTabs() {
+        // Ocultar pestañas de administración
+        const adminTabIds = ['usuarios', 'gestion-usuarios', 'administradores'];
+        adminTabIds.forEach(tabId => {
+            const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
+            if (tabBtn) tabBtn.style.display = 'none';
+        });
+        
+        // Si está en una pestaña admin, redirigir a ranking
+        const currentTab = document.querySelector('.tab-content.active');
+        if (currentTab && adminTabIds.includes(currentTab.id)) {
+            this.switchTab('ranking-main');
+        }
+    }
     switchTab(tabName) {
         // Ocultar todas las pestañas
         document.querySelectorAll('.tab-content').forEach(tab => {
@@ -154,49 +208,46 @@ class AuthManager {
         });
         
         // Mostrar pestaña seleccionada
-        document.getElementById(tabName).classList.add('active');
+        const targetTab = document.getElementById(tabName);
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
         
         // Actualizar botones de navegación
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
         
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+        }
     }
 
     setupEventListeners() {
-        // Formulario de login
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const usuario = document.getElementById('loginUsuario').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            await this.login(usuario, password);
-        });
-
-        // Botón de logout
+        // Botón de login/logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            this.logout();
-        });
-
-        // Navegación por pestañas
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tabName = btn.getAttribute('data-tab');
-                this.switchTab(tabName);
-            });
-        });
-
-        // Verificar sesión al cargar desde localStorage
-        const savedSession = localStorage.getItem('adminSession');
-        if (savedSession) {
-            const session = JSON.parse(savedSession);
-            // Verificar que la sesión no tenga más de 24 horas
-            if (Date.now() - session.timestamp < 24 * 60 * 60 * 1000) {
-                this.validateAdminUser(session.usuario);
+            if (this.userLevel === 0) {
+                // Si es público, mostrar login
+                this.showLogin();
             } else {
-                localStorage.removeItem('adminSession');
+                // Si es admin, cerrar sesión
+                this.logout();
             }
+        });
+
+        // Botón de acceso público en el login
+        const loginForm = document.getElementById('loginForm');
+        if (!document.getElementById('publicAccessBtn')) {
+            const publicBtn = document.createElement('button');
+            publicBtn.type = 'button';
+            publicBtn.id = 'publicAccessBtn';
+            publicBtn.className = 'btn btn-outline btn-large';
+            publicBtn.innerHTML = '<i class="fas fa-eye"></i> Acceder como Público';
+            publicBtn.addEventListener('click', () => {
+                this.accessAsPublic();
+            });
+            loginForm.appendChild(publicBtn);
         }
     }
 
@@ -210,7 +261,9 @@ class AuthManager {
 
         // Auto-eliminar después de 5 segundos
         setTimeout(() => {
-            notification.remove();
+            if (notification.parentNode) {
+                notification.remove();
+            }
         }, 5000);
     }
 
@@ -227,5 +280,7 @@ class AuthManager {
     }
 }
 
-// Inicializar el sistema de autenticación
-window.authManager = new AuthManager();
+// Inicializar el sistema de autenticación cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    window.authManager = new AuthManager();
+});

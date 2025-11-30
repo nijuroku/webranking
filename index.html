@@ -17,7 +17,13 @@
             <p>Cargando Sistema de Clasificación...</p>
         </div>
     </div>
-
+     <div class="public-access">
+        <p>¿Solo quieres ver los rankings?</p>
+            <button id="publicAccessBtn" class="btn btn-public btn-large">
+                <i class="fas fa-eye"></i> Acceder como Público
+            </button>
+    </div>
+    
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
@@ -26,7 +32,6 @@
                 <h2>🔐 Iniciar Sesión</h2>
                 <p>Sistema de Clasificación</p>
             </div>
-            
             <form id="loginForm" class="login-form">
                 <div class="form-group">
                     <label for="loginUsuario"><i class="fas fa-user"></i> Usuario:</label>
@@ -37,7 +42,6 @@
                     <label for="loginPassword"><i class="fas fa-lock"></i> Contraseña:</label>
                     <input type="password" id="loginPassword" required placeholder="Ingresa tu contraseña">
                 </div>
-
                 <button type="submit" class="btn btn-primary btn-large login-btn">
                     <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
                 </button>
@@ -454,4 +458,24 @@
     <script src="js/equipos.js"></script>
     <script src="js/admin.js"></script>
 </body>
+<css>
+    /* En styles/style.css */
+    .public-access {
+        text-align: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .btn-public {
+        background: transparent;
+        border: 2px solid var(--success);
+        color: var(--success);
+    }
+
+    .btn-public:hover {
+        background: var(--success);
+        color: white;
+    }
+</css>
 </html>
