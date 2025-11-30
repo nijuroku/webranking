@@ -28,43 +28,45 @@ class AdminManager {
     }
 
     async crearAdministrador(usuario, password, nombreCompleto, nivelAcceso) {
-        if (!window.authManager.hasAccess(1)) {
-            window.authManager.showNotification('No tienes permisos para esta acción', 'error');
-            return false;
-        }
-
-        try {
-            const passwordHash = await window.authManager.hashPassword(password);
-
-            const { data, error } = await window.supabaseClient
-                .from('administradores')
-                .insert([
-                    {
-                        usuario: usuario,
-                        password_hash: passwordHash,
-                        nombre_completo: nombreCompleto,
-                        nivel_acceso: parseInt(nivelAcceso)
-                    }
-                ])
-                .select();
-
-            if (error) throw error;
-
-            window.authManager.showNotification(`Administrador "${usuario}" creado correctamente`, 'success');
-            await this.loadAdministradores();
-            return true;
-            
-        } catch (error) {
-            console.error('Error creating admin:', error);
-            
-            if (error.code === '23505') {
-                window.authManager.showNotification('El usuario ya existe', 'error');
-            } else {
-                window.authManager.showNotification('Error al crear administrador', 'error');
-            }
-            return false;
-        }
+    // Verificar permisos - SOLO UNA VEZ
+    if (!window.authManager.hasAccess(2)) {  // Cambié a nivel 2 para Super Admin
+        window.authManager.showNotification('No tienes permisos para crear administradores', 'error');
+        return false;
     }
+
+    try {
+        // Usar SHA-256 para el hash (mismo método que en auth.js)
+        const passwordHash = await this.sha256(password);
+
+        const { data, error } = await window.supabaseClient
+            .from('administradores')
+            .insert([
+                {
+                    usuario: usuario,
+                    password_hash: passwordHash,
+                    nombre_completo: nombreCompleto,
+                    nivel_acceso: parseInt(nivelAcceso)
+                }
+            ])
+            .select();
+
+        if (error) throw error;
+
+        window.authManager.showNotification(`Administrador "${usuario}" creado correctamente`, 'success');
+        await this.loadAdministradores();
+        return true;
+        
+    } catch (error) {
+        console.error('Error creating admin:', error);
+        
+        if (error.code === '23505') {
+            window.authManager.showNotification('El usuario ya existe', 'error');
+        } else {
+            window.authManager.showNotification('Error al crear administrador: ' + error.message, 'error');
+        }
+        return false;
+    }
+}
 
     async toggleEstadoAdmin(adminId) {
         if (!window.authManager.hasAccess(2)) {
@@ -144,6 +146,13 @@ class AdminManager {
             return false;
         }
     }
+    async sha256(message) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
 
     renderAdministradores() {
         const tbody = document.getElementById('tbodyAdmins');
@@ -197,6 +206,7 @@ class AdminManager {
             });
         });
     }
+    
 
     setupEventListeners() {
         // Crear administrador
