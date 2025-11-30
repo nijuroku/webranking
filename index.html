@@ -19,13 +19,15 @@
     </div>
 
     <!-- Login Modal -->
-    <div id="loginModal" class="modal">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="login-header">
                 <img src="images/logo.png" alt="Logo" class="login-logo" id="loginLogo">
                 <h2>🔐 Iniciar Sesión</h2>
                 <p>Sistema de Clasificación</p>
             </div>
+            
             <form id="loginForm" class="login-form">
                 <div class="form-group">
                     <label for="loginUsuario"><i class="fas fa-user"></i> Usuario:</label>
@@ -36,6 +38,7 @@
                     <label for="loginPassword"><i class="fas fa-lock"></i> Contraseña:</label>
                     <input type="password" id="loginPassword" required placeholder="Ingresa tu contraseña">
                 </div>
+
                 <button type="submit" class="btn btn-primary btn-large login-btn">
                     <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
                 </button>
@@ -44,6 +47,8 @@
                     <p><i class="fas fa-info-circle"></i> Contacta al administrador para crear tu cuenta</p>
                 </div>
             </form>
+
+            <!-- Acceso público -->
             <div class="public-access">
                 <p>¿Solo quieres ver los rankings?</p>
                 <button id="publicAccessBtn" class="btn btn-public btn-large">

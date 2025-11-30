@@ -5,14 +5,20 @@ class MainApp {
 
     async init() {
         this.setupEventListeners();
-        await this.loadInitialData();
+        
+        // Esperar a que authManager esté listo
+        setTimeout(() => {
+            this.loadInitialData();
+        }, 1000);
     }
 
     async loadInitialData() {
-        // Cargar datos iniciales cuando el usuario esté autenticado
-        if (window.authManager.getCurrentUser()) {
+        // Cargar datos iniciales cuando la app esté lista
+        if (window.rankingManager) {
             await window.rankingManager.loadRankingMain();
-            await window.usuarioManager.loadUsuarios();
+            await window.rankingManager.loadRankingExtra();
+        }
+        if (window.equipoManager) {
             await window.equipoManager.loadEquipos();
         }
     }
@@ -20,30 +26,30 @@ class MainApp {
     setupEventListeners() {
         // Botones de exportación
         document.getElementById('exportMain').addEventListener('click', () => {
-            window.rankingManager.exportRanking('main');
+            if (window.rankingManager) window.rankingManager.exportRanking('main');
         });
 
         document.getElementById('exportExtra').addEventListener('click', () => {
-            window.rankingManager.exportRanking('extra');
+            if (window.rankingManager) window.rankingManager.exportRanking('extra');
         });
 
         // Botones de actualización
         document.getElementById('refreshMain').addEventListener('click', () => {
-            window.rankingManager.loadRankingMain();
+            if (window.rankingManager) window.rankingManager.loadRankingMain();
         });
 
         document.getElementById('refreshExtra').addEventListener('click', () => {
-            window.rankingManager.loadRankingExtra();
+            if (window.rankingManager) window.rankingManager.loadRankingExtra();
         });
 
         // Limpiar ranking extra
         document.getElementById('limpiarExtra').addEventListener('click', () => {
-            window.rankingManager.limpiarRankingExtra();
+            if (window.rankingManager) window.rankingManager.limpiarRankingExtra();
         });
 
         // Cambio de evento en ranking extra
         document.getElementById('eventoNombre').addEventListener('change', () => {
-            window.rankingManager.loadRankingExtra();
+            if (window.rankingManager) window.rankingManager.loadRankingExtra();
         });
     }
 }

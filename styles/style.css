@@ -26,7 +26,7 @@ body {
     color: var(--dark);
 }
 
-/* Loading Screen */
+/* Loading screen mejorado */
 .loading-screen {
     position: fixed;
     top: 0;
@@ -38,6 +38,7 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    transition: opacity 0.3s ease;
 }
 
 .loading-content {
@@ -60,6 +61,14 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+/* Mejoras para modo público */
+.modo-publico .admin-only {
+    display: none !important;
+}
+
+.user-badge.public {
+    background: var(--success) !important;
+}
 /* Header */
 .header {
     background: white;
@@ -465,20 +474,29 @@ tbody tr:hover {
     gap: 1rem;
     margin-top: 1.5rem;
 }
+/* Agregar al final del archivo */
 .public-access {
     text-align: center;
-    margin-top: 1rem;
-    padding-top: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--border);
+}
+
+.public-access p {
+    margin-bottom: 1rem;
+    color: var(--gray);
+    font-size: 0.9rem;
 }
 
 .btn-public {
     background: transparent;
     border: 2px solid var(--success);
     color: var(--success);
+    width: 100%;
 }
 
 .btn-public:hover {
     background: var(--success);
     color: white;
+    transform: translateY(-2px);
 }
