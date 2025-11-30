@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Sistema de Clasificación</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Cargando Sistema de Clasificación...</p>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="login-header">
+                <img src="images/logo.png" alt="Logo" class="login-logo" id="loginLogo">
+                <h2>🔐 Iniciar Sesión</h2>
+                <p>Sistema de Clasificación</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="loginUsuario"><i class="fas fa-user"></i> Usuario:</label>
+                    <input type="text" id="loginUsuario" required placeholder="Ingresa tu usuario">
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword"><i class="fas fa-lock"></i> Contraseña:</label>
+                    <input type="password" id="loginPassword" required placeholder="Ingresa tu contraseña">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+
+                <div class="login-info">
+                    <p><i class="fas fa-info-circle"></i> Contacta al administrador para crear tu cuenta</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App (oculto inicialmente) -->
+    <div id="mainApp" class="main-app" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="images/logo.png" alt="Logo" class="app-logo" id="appLogo">
+                    <div class="header-titles">
+                        <h1>Sistema de Clasificación</h1>
+                        <p class="subtitle">Gestión de rankings y equipos</p>
+                    </div>
+                </div>
+                <div class="header-controls">
+                    <div class="user-info" id="userInfo">
+                        <span id="userName">Usuario</span>
+                        <span class="user-badge" id="userBadge">Admin</span>
+                    </div>
+                    <button id="logoutBtn" class="btn btn-outline">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs-nav">
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="ranking-main">
+                    <i class="fas fa-trophy"></i> Ranking Main
+                </button>
+                <button class="tab-btn" data-tab="ranking-extra">
+                    <i class="fas fa-gamepad"></i> Ranking Extra
+                </button>
+                <button class="tab-btn" data-tab="usuarios">
+                    <i class="fas fa-users"></i> Usuarios
+                </button>
+                <button class="tab-btn" data-tab="equipos">
+                    <i class="fas fa-shield-alt"></i> Equipos
+                </button>
+                
+                <!-- Solo para administradores -->
+                <div class="admin-tabs" id="adminTabs" style="display: none;">
+                    <button class="tab-btn admin-tab" data-tab="gestion-usuarios">
+                        <i class="fas fa-user-cog"></i> Gestión Usuarios
+                    </button>
+                    <button class="tab-btn admin-tab" data-tab="administradores">
+                        <i class="fas fa-user-shield"></i> Administradores
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Ranking Main -->
+            <div id="ranking-main" class="tab-content active">
+                <div class="content-header">
+                    <h2><i class="fas fa-trophy"></i> Ranking Main</h2>
+                    <div class="controls">
+                        <button id="refreshMain" class="btn btn-primary">
+                            <i class="fas fa-sync-alt"></i> Actualizar
+                        </button>
+                        <button id="exportMain" class="btn btn-outline">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="tablaMain">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>TAG</th>
+                                <th>Usuario</th>
+                                <th>Equipo</th>
+                                <th>Puntos</th>
+                                <th>Tendencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMain">
+                            <!-- Datos cargados dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Ranking Extra -->
+            <div id="ranking-extra" class="tab-content">
+                <div class="content-header">
+                    <h2><i class="fas fa-gamepad"></i> Ranking Extra</h2>
+                    <div class="controls">
+                        <div class="event-controls">
+                            <input type="text" id="eventoNombre" placeholder="Nombre del evento" 
+                                   value="Evento For Fun">
+                            <button id="refreshExtra" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>
+                        </div>
+                        <div class="export-controls">
+                            <button id="exportExtra" class="btn btn-outline">
+                                <i class="fas fa-download"></i> Exportar
+                            </button>
+                            <button id="limpiarExtra" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="tablaExtra">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>TAG</th>
+                                <th>Usuario</th>
+                                <th>Equipo</th>
+                                <th>Puntos Extra</th>
+                                <th>Evento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyExtra">
+                            <!-- Datos cargados dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gestión de Usuarios -->
+            <div id="usuarios" class="tab-content">
+                <div class="content-grid">
+                    <!-- Agregar Usuario -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user-plus"></i> Agregar Usuario</h3>
+                        </div>
+                        <form id="formAgregarUsuario" class="form">
+                            <div class="form-group">
+                                <label for="nuevoUsuarioNombre">Nombre:</label>
+                                <input type="text" id="nuevoUsuarioNombre" required 
+                                       placeholder="Nombre completo del usuario">
+                            </div>
+                            <div class="form-group">
+                                <label for="nuevoUsuarioEquipo">Equipo:</label>
+                                <select id="nuevoUsuarioEquipo" required>
+                                    <option value="">Cargando equipos...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="nuevoUsuarioPuntos">Puntos Iniciales (Main):</label>
+                                <input type="number" id="nuevoUsuarioPuntos" value="0" min="0">
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Agregar Usuario
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Sumar Puntos Main -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-plus-circle"></i> Sumar Puntos Main</h3>
+                        </div>
+                        <form id="formSumarPuntosMain" class="form">
+                            <div class="form-group">
+                                <label for="usuarioPuntosMain">Usuario:</label>
+                                <select id="usuarioPuntosMain" required>
+                                    <option value="">Cargando usuarios...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cantidadPuntosMain">Puntos a Sumar:</label>
+                                <input type="number" id="cantidadPuntosMain" required min="1" 
+                                       placeholder="Cantidad de puntos">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Sumar Puntos
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Sumar Puntos Extra -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-star"></i> Sumar Puntos Extra</h3>
+                        </div>
+                        <form id="formSumarPuntosExtra" class="form">
+                            <div class="form-group">
+                                <label for="eventoPuntos">Evento:</label>
+                                <input type="text" id="eventoPuntos" required 
+                                       placeholder="Nombre del evento" value="Evento For Fun">
+                            </div>
+                            <div class="form-group">
+                                <label for="usuarioPuntosExtra">Usuario:</label>
+                                <select id="usuarioPuntosExtra" required>
+                                    <option value="">Cargando usuarios...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cantidadPuntosExtra">Puntos a Sumar:</label>
+                                <input type="number" id="cantidadPuntosExtra" required min="1" 
+                                       placeholder="Cantidad de puntos">
+                            </div>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-check"></i> Sumar Puntos Extra
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestión de Equipos -->
+            <div id="equipos" class="tab-content">
+                <div class="content-grid">
+                    <!-- Crear Equipo -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-plus"></i> Crear Nuevo Equipo</h3>
+                        </div>
+                        <form id="formCrearEquipo" class="form">
+                            <div class="form-group">
+                                <label for="nuevoEquipoNombre">Nombre del Equipo:</label>
+                                <input type="text" id="nuevoEquipoNombre" required 
+                                       placeholder="Nombre del equipo">
+                            </div>
+                            <div class="form-group">
+                                <label for="nuevoEquipoTag">TAG (máx 5 letras):</label>
+                                <input type="text" id="nuevoEquipoTag" required maxlength="5" 
+                                       placeholder="TAG único" style="text-transform: uppercase">
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Crear Equipo
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Lista de Equipos -->
+                    <div class="card card-full">
+                        <div class="card-header">
+                            <h3><i class="fas fa-list"></i> Equipos Existentes</h3>
+                            <button id="refreshEquipos" class="btn btn-outline">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table id="tablaEquipos">
+                                <thead>
+                                    <tr>
+                                        <th>Equipo</th>
+                                        <th>TAG</th>
+                                        <th>Miembros</th>
+                                        <th>Puntos Totales</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEquipos">
+                                    <!-- Datos cargados dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestión de Usuarios (Admin) -->
+            <div id="gestion-usuarios" class="tab-content">
+                <div class="content-grid">
+                    <!-- Información del Usuario -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user-edit"></i> Modificar Usuario</h3>
+                        </div>
+                        <div class="form">
+                            <div class="form-group">
+                                <label for="selectUsuarioGestion">Seleccionar Usuario:</label>
+                                <select id="selectUsuarioGestion" required>
+                                    <option value="">Cargando usuarios...</option>
+                                </select>
+                            </div>
+                            
+                            <div id="usuarioInfo" style="display: none;">
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>ID Usuario:</label>
+                                        <span id="infoId">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Posición:</label>
+                                        <span id="infoPosicion">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Fecha Creación:</label>
+                                        <span id="infoCreacion">-</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="editUsuarioNombre">Nombre:</label>
+                                    <input type="text" id="editUsuarioNombre" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editUsuarioEquipo">Equipo:</label>
+                                    <select id="editUsuarioEquipo" required>
+                                        <option value="">Cargando equipos...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editUsuarioPuntos">Puntos Main:</label>
+                                    <input type="number" id="editUsuarioPuntos" required min="0">
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button id="guardarUsuario" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Guardar Cambios
+                                    </button>
+                                    <button id="eliminarUsuario" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Eliminar Usuario
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestión de Administradores (Super Admin) -->
+            <div id="administradores" class="tab-content">
+                <div class="content-grid">
+                    <!-- Crear Administrador -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user-plus"></i> Crear Administrador</h3>
+                        </div>
+                        <form id="formCrearAdmin" class="form">
+                            <div class="form-group">
+                                <label for="nuevoAdminUsuario">Usuario:</label>
+                                <input type="text" id="nuevoAdminUsuario" required 
+                                       placeholder="Nombre de usuario">
+                            </div>
+                            <div class="form-group">
+                                <label for="nuevoAdminPassword">Contraseña:</label>
+                                <input type="password" id="nuevoAdminPassword" required 
+                                       placeholder="Contraseña">
+                            </div>
+                            <div class="form-group">
+                                <label for="nuevoAdminNombre">Nombre Completo:</label>
+                                <input type="text" id="nuevoAdminNombre" 
+                                       placeholder="Nombre completo">
+                            </div>
+                            <div class="form-group">
+                                <label for="nuevoAdminNivel">Nivel de Acceso:</label>
+                                <select id="nuevoAdminNivel" required>
+                                    <option value="1">Admin Normal</option>
+                                    <option value="2">Super Admin</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Crear Administrador
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Lista de Administradores -->
+                    <div class="card card-full">
+                        <div class="card-header">
+                            <h3><i class="fas fa-users-cog"></i> Administradores</h3>
+                            <button id="refreshAdmins" class="btn btn-outline">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table id="tablaAdmins">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Nombre</th>
+                                        <th>Nivel</th>
+                                        <th>Estado</th>
+                                        <th>Fecha Creación</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyAdmins">
+                                    <!-- Datos cargados dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/rankings.js"></script>
+    <script src="js/usuarios.js"></script>
+    <script src="js/equipos.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
