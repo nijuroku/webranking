@@ -462,5 +462,59 @@
     <script src="js/usuarios.js"></script>
     <script src="js/equipos.js"></script>
     <script src="js/admin.js"></script>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <button id="viewHistory" class="btn btn-link">
+                <i class="fas fa-history"></i> Ver Historial de Puntos
+            </button>
+            <span class="footer-text">Sistema de Clasificación © 2024</span>
+        </div>
+    </footer>
+    <!-- Modal para el historial -->
+    <div id="historyModal" class="modal" style="display: none;">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-history"></i> Historial de Puntos</h3>
+                <button class="btn-close" id="closeHistory">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="history-filters">
+                    <select id="historyFilter" class="form-select">
+                        <option value="all">Todos los eventos</option>
+                        <option value="main">Puntos Main</option>
+                        <option value="extra">Puntos Extra</option>
+                    </select>
+                    <button id="refreshHistory" class="btn btn-primary btn-small">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Administrador</th>
+                                <th>Acción</th>
+                                <th>Usuario</th>
+                                <th>Cantidad</th>
+                                <th>Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr>
+                                <td colspan="6" class="loading-row">
+                                    <div class="loading-spinner-small"></div>
+                                    Cargando historial...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
