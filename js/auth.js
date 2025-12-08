@@ -177,223 +177,232 @@ class AuthManager {
 
   // Nuevo método para acceso público
   accessAsPublic() {
-    this.currentUser = null;
-    this.userLevel = 0;
-    this.showMainApp();
-    console.log("Acceso público activado");
-  }
-
-  async logout() {
-    this.currentUser = null;
-    this.userLevel = 0;
-    localStorage.removeItem("adminSession");
-    this.accessAsPublic();
-    this.showNotification("Sesión cerrada correctamente", "success");
-  }
-
-  hideLoading() {
-    document.getElementById("loading").style.display = "none";
-  }
-
-  showLogin() {
-    document.getElementById("mainApp").style.display = "none";
-    document.getElementById("loginModal").style.display = "flex";
-  }
-
-  showMainApp() {
-    this.hideLoading();
-    document.getElementById("loginModal").style.display = "none";
-    document.getElementById("mainApp").style.display = "block";
-
-    // Forzar actualización de UI inmediatamente
-    this.updateUI();
-
-    console.log(
-      "🏠 Main app mostrada - Usuario:",
-      this.currentUser?.usuario,
-      "Nivel:",
-      this.userLevel
-    );
-
-    // Cargar datos iniciales con retardo para asegurar que la UI esté lista
-    setTimeout(() => {
-      this.loadInitialData();
-    }, 100);
-  }
-
-  // 🔄 AGREGAR ESTE MÉTODO TAMBIÉN
-  async loadInitialData() {
-    console.log("📊 Cargando datos iniciales...");
-
-    try {
-      if (window.rankingManager) {
-        await window.rankingManager.loadRankingMain();
-        await window.rankingManager.loadRankingExtra();
-      }
-
-      if (window.equipoManager) {
-        await window.equipoManager.loadEquipos();
-      }
-
-      if (window.usuarioManager) {
-        await window.usuarioManager.loadUsuarios();
-      }
-
-      console.log("✅ Todos los datos cargados correctamente");
-    } catch (error) {
-      console.error("❌ Error cargando datos iniciales:", error);
-    }
-  }
-
-  updateUI() {
-    const userInfo = document.getElementById("userInfo");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const adminTabs = document.getElementById("adminTabs");
-
-    if (this.userLevel === 0) {
-      // Modo público
-      userInfo.innerHTML = "<span>👤 Modo Público</span>";
-      logoutBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
-      adminTabs.style.display = "none";
-
-      // Ocultar pestañas de administración
-      this.hideAdminTabs();
-    } else {
-      // Modo administrador
-      document.getElementById("userName").textContent =
-        this.currentUser.nombre_completo || this.currentUser.usuario;
-
-      const badge = document.getElementById("userBadge");
-      badge.textContent = this.userLevel >= 2 ? "Super Admin" : "Admin";
-      badge.style.background = this.userLevel >= 2 ? "#e74c3c" : "#3498db";
-
-      logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Cerrar Sesión';
-
-      // Mostrar pestañas de admin según nivel
-      if (this.userLevel >= 2) {
-        adminTabs.style.display = "block";
-      } else {
-        adminTabs.style.display = "none";
-      }
-    }
-  }
-
-  hideAdminTabs() {
-    // Ocultar pestañas de administración
-    const adminTabIds = ["usuarios", "gestion-usuarios", "administradores"];
-    adminTabIds.forEach((tabId) => {
-      const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
-      if (tabBtn) tabBtn.style.display = "none";
-    });
-
-    // Si está en una pestaña admin, redirigir a ranking
-    const currentTab = document.querySelector(".tab-content.active");
-    if (currentTab && adminTabIds.includes(currentTab.id)) {
-      this.switchTab("ranking-main");
-    }
-  }
-
-  switchTab(tabName) {
-    // Ocultar todas las pestañas
-    document.querySelectorAll(".tab-content").forEach((tab) => {
-      tab.classList.remove("active");
-    });
-
-    // Mostrar pestaña seleccionada
-    const targetTab = document.getElementById(tabName);
-    if (targetTab) {
-      targetTab.classList.add("active");
+        this.currentUser = null;
+        this.userLevel = 0;
+        this.showMainApp();
+        console.log('🌐 Acceso público activado');
     }
 
-    // Actualizar botones de navegación
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
-      btn.classList.remove("active");
-    });
-
-    const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
-    if (targetBtn) {
-      targetBtn.classList.add("active");
+    async logout() {
+        this.currentUser = null;
+        this.userLevel = 0;
+        localStorage.removeItem('adminSession');
+        this.accessAsPublic();
+        this.showNotification('Sesión cerrada correctamente', 'success');
     }
-  }
 
-  setupEventListeners() {
-    // Formulario de login
-    document
-      .getElementById("loginForm")
-      .addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const usuario = document.getElementById("loginUsuario").value;
-        const password = document.getElementById("loginPassword").value;
+    hideLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+            loading.style.display = 'none';
+        }
+    }
 
-        if (!usuario || !password) {
-          this.showNotification(
-            "Usuario y contraseña son obligatorios",
-            "error"
-          );
-          return;
+    showLogin() {
+        const mainApp = document.getElementById('mainApp');
+        const loginModal = document.getElementById('loginModal');
+        
+        if (mainApp) mainApp.style.display = 'none';
+        if (loginModal) loginModal.style.display = 'flex';
+    }
+
+    showMainApp() {
+        this.hideLoading();
+        
+        const loginModal = document.getElementById('loginModal');
+        const mainApp = document.getElementById('mainApp');
+        
+        if (loginModal) loginModal.style.display = 'none';
+        if (mainApp) mainApp.style.display = 'block';
+        
+        this.updateUI();
+        
+        console.log('🏠 Main app mostrada - Usuario:', this.currentUser?.usuario, 'Nivel:', this.userLevel);
+    }
+
+    updateUI() {
+        const userInfo = document.getElementById('userInfo');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const adminTabs = document.getElementById('adminTabs');
+        
+        if (!userInfo || !logoutBtn) return;
+
+        if (this.userLevel === 0) {
+            // Modo público
+            userInfo.innerHTML = '<span>👤 Modo Público</span>';
+            logoutBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+            if (adminTabs) adminTabs.style.display = 'none';
+            this.hideAdminTabs();
+        } else {
+            // Modo administrador
+            const userName = document.getElementById('userName');
+            const userBadge = document.getElementById('userBadge');
+            
+            if (userName) {
+                userName.textContent = this.currentUser.nombre_completo || this.currentUser.usuario;
+            }
+            
+            if (userBadge) {
+                userBadge.textContent = this.userLevel >= 2 ? 'Super Admin' : 'Admin';
+                userBadge.style.background = this.userLevel >= 2 ? '#e74c3c' : '#3498db';
+            }
+            
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Cerrar Sesión';
+            
+            // Mostrar pestañas de admin según nivel
+            if (adminTabs) {
+                adminTabs.style.display = this.userLevel >= 2 ? 'block' : 'none';
+            }
+        }
+    }
+
+    hideAdminTabs() {
+        const adminTabIds = ['usuarios', 'gestion-usuarios', 'administradores'];
+        adminTabIds.forEach(tabId => {
+            const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
+            if (tabBtn) tabBtn.style.display = 'none';
+        });
+        
+        const currentTab = document.querySelector('.tab-content.active');
+        if (currentTab && adminTabIds.includes(currentTab.id)) {
+            this.switchTab('ranking-main');
+        }
+    }
+
+    switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        const targetTab = document.getElementById(tabName);
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+        }
+    }
+
+    setupEventListeners() {
+        // Formulario de login
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const usuario = document.getElementById('loginUsuario')?.value;
+                const password = document.getElementById('loginPassword')?.value;
+                
+                if (!usuario || !password) {
+                    this.showNotification('Usuario y contraseña son obligatorios', 'error');
+                    return;
+                }
+                
+                await this.login(usuario, password);
+            });
         }
 
-        await this.login(usuario, password);
-      });
+        // Botón de login/logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (this.userLevel === 0) {
+                    this.showLogin();
+                } else {
+                    this.logout();
+                }
+            });
+        }
 
-    // Botón de login/logout
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      if (this.userLevel === 0) {
-        // Si es público, mostrar login
-        this.showLogin();
-      } else {
-        // Si es admin, cerrar sesión
-        this.logout();
-      }
-    });
+        // Botón de acceso público
+        const publicAccessBtn = document.getElementById('publicAccessBtn');
+        if (publicAccessBtn) {
+            publicAccessBtn.addEventListener('click', () => {
+                this.accessAsPublic();
+            });
+        }
 
-    // Botón de acceso público en el login
-    const publicAccessBtn = document.getElementById("publicAccessBtn");
-    if (publicAccessBtn) {
-      publicAccessBtn.addEventListener("click", () => {
-        this.accessAsPublic();
-      });
+        // Navegación por pestañas
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.getAttribute('data-tab');
+                this.switchTab(tabName);
+            });
+        });
     }
 
-    // Navegación por pestañas
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const tabName = btn.getAttribute("data-tab");
-        this.switchTab(tabName);
-      });
-    });
-  }
+    showNotification(message, type = 'info') {
+        const notifications = document.getElementById('notifications');
+        if (!notifications) return;
 
-  showNotification(message, type = "info") {
-    const notifications = document.getElementById("notifications");
-    const notification = document.createElement("div");
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
 
-    notifications.appendChild(notification);
+        notifications.appendChild(notification);
 
-    // Auto-eliminar después de 5 segundos
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.remove();
-      }
-    }, 5000);
-  }
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
 
-  getCurrentUser() {
-    return this.currentUser;
-  }
+    getCurrentUser() {
+        return this.currentUser;
+    }
 
-  getUserLevel() {
-    return this.userLevel;
-  }
+    getUserLevel() {
+        return this.userLevel;
+    }
 
-  hasAccess(requiredLevel) {
-    return this.userLevel >= requiredLevel;
-  }
+    hasAccess(requiredLevel) {
+        return this.userLevel >= requiredLevel;
+    }
+
+    async forceReloadData() {
+        console.log('🔄 Forzando recarga de datos después del login...');
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        try {
+            if (window.rankingManager) {
+                await window.rankingManager.loadRankingMain();
+                await window.rankingManager.loadRankingExtra();
+                console.log('✅ Rankings recargados');
+            }
+            
+            if (window.equipoManager) {
+                await window.equipoManager.loadEquipos();
+                console.log('✅ Equipos recargados');
+            }
+            
+            if (window.usuarioManager) {
+                await window.usuarioManager.loadUsuarios();
+                console.log('✅ Usuarios recargados');
+            }
+            
+            if (window.adminManager && this.userLevel >= 2) {
+                await window.adminManager.loadAdministradores();
+                console.log('✅ Administradores recargados');
+            }
+            
+            if (window.historialManager) {
+                await window.historialManager.loadHistorial();
+                console.log('✅ Historial recargado');
+            }
+            
+        } catch (error) {
+            console.error('Error recargando datos:', error);
+        }
+    }
 }
 
-// Inicializar el sistema de autenticación cuando el DOM esté listo
-document.addEventListener("DOMContentLoaded", () => {
-  window.authManager = new AuthManager();
-});
+// Inicializar el sistema de autenticación
+document.addEventListener('DOMContentLoaded', () => {
+    window.authManager = new AuthManager();
