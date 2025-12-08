@@ -186,87 +186,119 @@
             </div>
 
             <!-- Gestión de Usuarios -->
-            <div id="usuarios" class="tab-content">
-                <div class="content-grid">
-                    <!-- Agregar Usuario -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-user-plus"></i> Agregar Usuario</h3>
-                        </div>
-                        <form id="formAgregarUsuario" class="form">
-                            <div class="form-group">
-                                <label for="nuevoUsuarioNombre">Nombre:</label>
-                                <input type="text" id="nuevoUsuarioNombre" required 
-                                       placeholder="Nombre completo del usuario">
-                            </div>
-                            <div class="form-group">
-                                <label for="nuevoUsuarioEquipo">Equipo:</label>
-                                <select id="nuevoUsuarioEquipo" required>
-                                    <option value="">Cargando equipos...</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="nuevoUsuarioPuntos">Puntos Iniciales (Main):</label>
-                                <input type="number" id="nuevoUsuarioPuntos" value="0" min="0">
-                            </div>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-plus"></i> Agregar Usuario
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Sumar Puntos Main -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-plus-circle"></i> Sumar Puntos Main</h3>
-                        </div>
-                        <form id="formSumarPuntosMain" class="form">
-                            <div class="form-group">
-                                <label for="usuarioPuntosMain">Usuario:</label>
-                                <select id="usuarioPuntosMain" required>
-                                    <option value="">Cargando usuarios...</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="cantidadPuntosMain">Puntos a Sumar:</label>
-                                <input type="number" id="cantidadPuntosMain" required min="1" 
-                                       placeholder="Cantidad de puntos">
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-check"></i> Sumar Puntos
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Sumar Puntos Extra -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-star"></i> Sumar Puntos Extra</h3>
-                        </div>
-                        <form id="formSumarPuntosExtra" class="form">
-                            <div class="form-group">
-                                <label for="eventoPuntos">Evento:</label>
-                                <input type="text" id="eventoPuntos" required 
-                                       placeholder="Nombre del evento" value="Evento For Fun">
-                            </div>
-                            <div class="form-group">
-                                <label for="usuarioPuntosExtra">Usuario:</label>
-                                <select id="usuarioPuntosExtra" required>
-                                    <option value="">Cargando usuarios...</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="cantidadPuntosExtra">Puntos a Sumar:</label>
-                                <input type="number" id="cantidadPuntosExtra" required min="1" 
-                                       placeholder="Cantidad de puntos">
-                            </div>
-                            <button type="submit" class="btn btn-warning">
-                                <i class="fas fa-check"></i> Sumar Puntos Extra
-                            </button>
-                        </form>
-                    </div>
-                </div>
+            <!-- Gestión de Usuarios -->
+<div id="usuarios" class="tab-content">
+    <div class="content-grid">
+        <!-- Agregar Usuario (se mantiene igual) -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-user-plus"></i> Agregar Usuario</h3>
             </div>
+            <form id="formAgregarUsuario" class="form">
+                <div class="form-group">
+                    <label for="nuevoUsuarioNombre">Nombre:</label>
+                    <input type="text" id="nuevoUsuarioNombre" required 
+                           placeholder="Nombre completo del usuario">
+                </div>
+                <div class="form-group">
+                    <label for="nuevoUsuarioEquipo">Equipo:</label>
+                    <select id="nuevoUsuarioEquipo" required>
+                        <option value="">Cargando equipos...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nuevoUsuarioPuntos">Puntos Iniciales (Main):</label>
+                    <input type="number" id="nuevoUsuarioPuntos" value="0" min="0">
+                </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Agregar Usuario
+                </button>
+            </form>
+        </div>
+
+        <!-- Sumar Puntos Main (se mantiene igual) -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-plus-circle"></i> Sumar Puntos Main</h3>
+            </div>
+            <form id="formSumarPuntosMain" class="form">
+                <div class="form-group">
+                    <label for="usuarioPuntosMain">Usuario:</label>
+                    <select id="usuarioPuntosMain" required>
+                        <option value="">Cargando usuarios...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cantidadPuntosMain">Puntos a Sumar:</label>
+                    <input type="number" id="cantidadPuntosMain" required min="1" 
+                           placeholder="Cantidad de puntos">
+                </div>
+                    <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Sumar Puntos
+                </button>
+            </form>
+        </div>
+
+        <!-- Sumar Puntos Extra (se mantiene igual) -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-star"></i> Sumar Puntos Extra</h3>
+            </div>
+            <form id="formSumarPuntosExtra" class="form">
+                <div class="form-group">
+                    <label for="eventoPuntos">Evento:</label>
+                    <input type="text" id="eventoPuntos" required 
+                           placeholder="Nombre del evento" value="Evento For Fun">
+                </div>
+                <div class="form-group">
+                    <label for="usuarioPuntosExtra">Usuario:</label>
+                    <select id="usuarioPuntosExtra" required>
+                        <option value="">Cargando usuarios...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cantidadPuntosExtra">Puntos a Sumar:</label>
+                    <input type="number" id="cantidadPuntosExtra" required min="1" 
+                           placeholder="Cantidad de puntos">
+                </div>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-check"></i> Sumar Puntos Extra
+                </button>
+            </form>
+        </div>
+
+        <!-- NUEVA SECCIÓN: Listado de Usuarios -->
+        <!-- <div class="card card-full">
+            <div class="card-header">
+                <h3><i class="fas fa-list"></i> Listado de Usuarios</h3>
+                <button id="refreshUsuariosList" class="btn btn-outline">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+            </div>
+            <div class="table-container">
+                <table id="tablaUsuariosList">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Usuario</th>
+                            <th>Equipo</th>
+                            <th>Puntos Main</th>
+                            <th>Posición</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyUsuariosList">
+                        <tr>
+                            <td colspan="5" class="loading-row">
+                                <div class="loading-spinner-small"></div>
+                                Cargando usuarios...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div> -->
+    </div>
+</div>
 
             <!-- Gestión de Equipos -->
             <div id="equipos" class="tab-content">

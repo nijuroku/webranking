@@ -1,6 +1,7 @@
 class UsuarioManager {
   constructor() {
     this.usuarios = [];
+    this.usuariosOrdenados = []; // Para mantener el orden por puntos
     this.setupEventListeners();
   }
 
@@ -19,7 +20,12 @@ class UsuarioManager {
       if (error) throw error;
 
       this.usuarios = usuarios;
+      this.usuariosOrdenados = [...usuarios].sort(
+        (a, b) => b.puntos_main - a.puntos_main
+      );
+
       this.updateUsuarioSelects();
+      this.renderListadoUsuarios(); // Nueva función
     } catch (error) {
       console.error("Error loading users:", error);
       window.authManager.showNotification(
@@ -27,6 +33,99 @@ class UsuarioManager {
         "error"
       );
     }
+  }
+  // NUEVO MÉTODO: Renderizar listado de usuarios
+  renderListadoUsuarios() {
+    const tbody = document.getElementById("tbodyUsuariosList");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    if (this.usuarios.length === 0) {
+      tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="no-data">
+                        No hay usuarios registrados
+                    </td>
+                </tr>
+            `;
+      return;
+    }
+
+    this.usuarios.forEach((usuario, index) => {
+      const posicion = this.obtenerPosicionUsuario(usuario.id);
+      const equipoTag = usuario.equipos?.tag || "SIN";
+      const equipoNombre = usuario.equipos?.nombre || "Sin Equipo";
+
+      // Determinar emoji según posición
+      let emoji = "";
+      if (posicion === 1) emoji = "🥇";
+      else if (posicion === 2) emoji = "🥈";
+      else if (posicion === 3) emoji = "🥉";
+      else if (posicion <= 10) emoji = "⭐";
+
+      // Crear nombre con TAG al inicio
+      const nombreConTag = `<strong>[#${equipoTag}]</strong> ${usuario.nombre}`;
+
+      const row = document.createElement("tr");
+
+      // Aplicar clases según posición
+      if (posicion === 1) row.classList.add("first-place");
+      else if (posicion === 2) row.classList.add("second-place");
+      else if (posicion === 3) row.classList.add("third-place");
+      else if (posicion <= 10) row.classList.add("top-ten");
+
+      row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>
+                    <div class="usuario-con-tag">
+                        ${nombreConTag}
+                    </div>
+                </td>
+                <td>
+                    <div class="equipo-info">
+                        <span class="tag-badge">#${equipoTag}</span>
+                        <span class="equipo-nombre">${equipoNombre}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="puntos-main">${usuario.puntos_main}</span>
+                    <span class="puntos-trend ${this.obtenerTendencia(
+                      usuario.id
+                    )}">
+                        ${this.obtenerIconoTendencia(usuario.id)}
+                    </span>
+                </td>
+                <td>
+                    <span class="posicion-badge">
+                        ${emoji} #${posicion}
+                    </span>
+                </td>
+            `;
+
+      tbody.appendChild(row);
+    });
+  }
+
+  // Método auxiliar para obtener posición
+  obtenerPosicionUsuario(usuarioId) {
+    const index = this.usuariosOrdenados.findIndex((u) => u.id === usuarioId);
+    return index !== -1 ? index + 1 : 0;
+  }
+
+  // Métodos auxiliares para tendencia (puedes implementar lógica real)
+  obtenerTendencia(usuarioId) {
+    // Aquí puedes implementar lógica real de tendencia
+    // Por ahora devolvemos un valor aleatorio para ejemplo
+    const tendencias = ["up", "down", "neutral"];
+    return tendencias[Math.floor(Math.random() * tendencias.length)];
+  }
+
+  obtenerIconoTendencia(usuarioId) {
+    const tendencia = this.obtenerTendencia(usuarioId);
+    if (tendencia === "up") return "↗️";
+    if (tendencia === "down") return "↘️";
+    return "➡️";
   }
 
   updateUsuarioSelects() {
@@ -42,9 +141,12 @@ class UsuarioManager {
         select.innerHTML = '<option value="">Seleccionar usuario...</option>';
 
         this.usuarios.forEach((usuario) => {
+          const equipoTag = usuario.equipos?.tag || "SIN";
+          const displayText = `[#${equipoTag}] ${usuario.nombre}`;
+
           const option = document.createElement("option");
           option.value = usuario.id;
-          option.textContent = usuario.nombre;
+          option.textContent = displayText;
           select.appendChild(option);
         });
       }
@@ -538,6 +640,19 @@ class UsuarioManager {
           );
           return false;
         }
+      });
+    // Nuevo event listener para actualizar listado
+    document
+      .getElementById("refreshUsuariosList")
+      ?.addEventListener("click", () => {
+        this.loadUsuarios();
+      });
+
+    // Cargar usuarios cuando se muestre la pestaña
+    document
+      .querySelector('[data-tab="usuarios"]')
+      ?.addEventListener("click", () => {
+        this.loadUsuarios();
       });
   }
 }

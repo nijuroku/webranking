@@ -535,12 +535,46 @@ tbody tr:hover {
 }
 
 /* Modal grande para historial */
+/* Modal pantalla completa */
 .large-modal {
-    max-width: 900px;
-    max-height: 80vh;
+    width: 95vw !important;
+    height: 90vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 2.5vh auto;
     display: flex;
     flex-direction: column;
+    background: white;
+    border-radius: var(--radius);
+    position: relative;
 }
+
+.modal-body {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+}
+
+.table-container {
+    height: 100%;
+    overflow: auto;
+    display: flex;
+    justify-content: center; /* Centrar horizontalmente */
+    padding: 20px; /* Añadir padding para no pegarse a los bordes */
+}
+/* Opcional: Agregar un contenedor interno */
+.table-inner {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+#historyTable {
+    width: auto; /* Cambiar de 100% a auto */
+    min-width: 1000px;
+    margin: 0 auto; /* Centrar la tabla */
+}
+
 
 .modal-header {
     display: flex;
@@ -615,4 +649,395 @@ tbody tr:hover {
 .badge-warning {
     background: var(--warning);
     color: white;
+}
+/* Usar flexbox para centrar TODO el contenido de la tabla */
+#historyTable tbody tr {
+    display: flex;
+    align-items: stretch; /* Todas las filas misma altura */
+}
+
+#historyTable tbody td {
+    display: flex;
+    align-items: center; /* Centrar verticalmente */
+    justify-content: center; /* Centrar horizontalmente */
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Cabecera también con flexbox */
+#historyTable thead tr {
+    display: flex;
+    align-items: center;
+}
+
+#historyTable thead th {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem 0.5rem;
+}
+
+/* ANCHOS ESPECÍFICOS CON FLEXBOX */
+#historyTable tbody tr,
+#historyTable thead tr {
+    width: 100%;
+}
+
+#historyTable tbody td:nth-child(1),
+#historyTable thead th:nth-child(1) { /* Fecha */
+    flex: 0 0 140px;
+    min-width: 140px;
+    text-align: center;
+}
+
+#historyTable tbody td:nth-child(2),
+#historyTable thead th:nth-child(2) { /* Administrador */
+    flex: 0 0 150px;
+    min-width: 150px;
+    text-align: center;
+}
+
+#historyTable tbody td:nth-child(3),
+#historyTable thead th:nth-child(3) { /* Usuario - MÁS ANCHO */
+    flex: 0 0 300px;
+    min-width: 300px;
+    text-align: center;
+    justify-content: flex-start; /* Alinear izquierda pero centrado vertical */
+    padding-left: 1rem;
+}
+
+#historyTable tbody td:nth-child(4),
+#historyTable thead th:nth-child(4) { /* Cantidad */
+    flex: 0 0 100px;
+    min-width: 100px;
+    text-align: center;
+}
+
+#historyTable tbody td:nth-child(5),
+#historyTable thead th:nth-child(5) { /* Motivo */
+    flex: 0 0 350px;
+    min-width: 350px;
+    text-align: center;
+    justify-content: flex-start; /* Alinear izquierda pero centrado vertical */
+    padding-left: 1rem;
+}
+
+#historyTable tbody td:nth-child(6),
+#historyTable thead th:nth-child(6) { /* Rank */
+    flex: 0 0 110px;
+    min-width: 110px;
+    text-align: center;
+}
+
+/* Contenido dentro de las celdas centrado */
+.cell-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+}
+
+/* Para columnas que necesitan alineación izquierda pero centrado vertical */
+.left-aligned-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
+.left-aligned-cell .cell-content {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/*listado de usuarios*/
+/* Estilos para el listado de usuarios */
+#tablaUsuariosList {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#tablaUsuariosList th {
+    background: #f8f9fa;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--dark);
+    border-bottom: 2px solid var(--border);
+}
+
+#tablaUsuariosList td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+#tablaUsuariosList tbody tr:hover {
+    background-color: #f8fafd;
+}
+
+/* Estilos para usuario con TAG */
+.usuario-con-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.usuario-con-tag strong {
+    color: var(--primary);
+    background: rgba(67, 97, 238, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* Información del equipo */
+.equipo-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tag-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    background: var(--primary);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    min-width: 50px;
+    text-align: center;
+}
+
+.equipo-nombre {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+/* Puntos */
+.puntos-main {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--dark);
+    margin-right: 0.5rem;
+}
+
+.puntos-trend {
+    font-size: 0.9rem;
+}
+
+.puntos-trend.up {
+    color: var(--success);
+}
+
+.puntos-trend.down {
+    color: var(--danger);
+}
+
+.puntos-trend.neutral {
+    color: var(--gray);
+}
+
+/* Posición */
+.posicion-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    background: #f8f9fa;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Clases para posiciones destacadas */
+.first-place {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05)) !important;
+}
+
+.first-place td:first-child {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.second-place {
+    background: rgba(192, 192, 192, 0.1) !important;
+}
+
+.second-place td:first-child {
+    font-weight: bold;
+    color: #c0c0c0;
+}
+
+.third-place {
+    background: rgba(205, 127, 50, 0.1) !important;
+}
+
+.third-place td:first-child {
+    font-weight: bold;
+    color: #cd7f32;
+}
+
+.top-ten {
+    background: rgba(67, 97, 238, 0.03) !important;
+}
+
+/* Estilos para los selects con TAG */
+select option {
+    padding: 0.5rem;
+}
+
+/* Responsive para el listado */
+@media (max-width: 768px) {
+    #tablaUsuariosList {
+        font-size: 0.85rem;
+    }
+    
+    #tablaUsuariosList th,
+    #tablaUsuariosList td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .usuario-con-tag {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .equipo-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+
+/* Animación para actualización */
+@keyframes highlightUpdate {
+    0% { background-color: rgba(67, 97, 238, 0.2); }
+    100% { background-color: transparent; }
+}
+
+.updated-row {
+    animation: highlightUpdate 1s ease;
+}
+
+/* Estilos mejorados para la tabla de administradores */
+.admin-actions {
+    display: flex;
+    gap: 0.3rem;
+    justify-content: center;
+    min-height: 40px;
+    align-items: center;
+}
+
+.btn-small {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.8rem !important;
+    min-width: 40px;
+    min-height: 35px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+}
+
+.btn-warning.btn-small {
+    background: linear-gradient(135deg, #f39c12, #e67e22) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.btn-danger.btn-small {
+    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.btn-warning.btn-small:hover {
+    background: linear-gradient(135deg, #e67e22, #d35400) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(243, 156, 18, 0.3);
+}
+
+.btn-danger.btn-small:hover {
+    background: linear-gradient(135deg, #c0392b, #a93226) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
+}
+
+/* Mejorar visibilidad del usuario actual */
+.current-user {
+    background: linear-gradient(90deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.05)) !important;
+    border-left: 4px solid #3498db !important;
+}
+
+.current-user td {
+    font-weight: 500;
+}
+
+.badge-you {
+    background: #3498db !important;
+    color: white !important;
+    padding: 0.15rem 0.4rem !important;
+    border-radius: 10px !important;
+    font-size: 0.65rem !important;
+    margin-left: 0.3rem;
+    vertical-align: middle;
+}
+
+/* Badges mejorados */
+.badge {
+    padding: 0.4rem 0.8rem !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9) !important;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
+}
+
+/* Mejorar hover de filas */
+#tablaAdmins tbody tr {
+    transition: all 0.2s ease;
+}
+
+#tablaAdmins tbody tr:hover {
+    background-color: #f8fafd !important;
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Asegurar que los botones sean siempre visibles */
+.admin-actions .btn-small {
+    opacity: 0.9;
+    transition: all 0.2s ease;
+}
+
+.admin-actions .btn-small:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+/* Estilo para texto "No disponible" */
+.text-muted {
+    color: #95a5a6 !important;
+    font-style: italic;
+    font-size: 0.85rem;
+    padding: 0.3rem;
+    display: inline-block;
 }
