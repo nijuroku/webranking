@@ -68,19 +68,10 @@ class HistorialManager {
         try {
             this.showLoading();
             
+            // Cargar historial directamente - NO HACER JOINS COMPLEJOS
             const { data, error } = await window.supabaseClient
                 .from('historial_puntos')
-                .select(`
-                    *,
-                    usuario:usuarios!historial_puntos_usuario_id_fkey (
-                        nombre,
-                        equipos (nombre, tag)
-                    ),
-                    admin:administradores!historial_puntos_admin_id_fkey (
-                        usuario,
-                        nombre_completo
-                    )
-                `)
+                .select('*')
                 .order('fecha_registro', { ascending: false })
                 .limit(100);
 
@@ -93,6 +84,8 @@ class HistorialManager {
             console.error('Error loading history:', error);
             if (window.authManager) {
                 window.authManager.showNotification('Error al cargar el historial', 'error');
+            } else {
+                alert('Error al cargar el historial');
             }
             this.hideLoading();
         }
@@ -111,7 +104,7 @@ class HistorialManager {
         if (filteredData.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="no-data">No hay registros en el historial</td>
+                    <td colspan="6" class="no-data">No hay registros en el historial</td>
                 </tr>
             `;
             return;
@@ -127,11 +120,9 @@ class HistorialManager {
                 minute: '2-digit'
             });
             
-            // Usar datos del historial o de las tablas relacionadas
-            const adminNombre = item.admin_nombre || item.admin?.nombre_completo || item.admin_usuario || item.admin?.usuario || 'Sistema';
-            const usuarioNombre = item.usuario_nombre || item.usuario?.nombre || 'Usuario eliminado';
-            const equipoNombre = item.equipo_nombre || item.usuario?.equipos?.nombre || '';
-            const equipoTag = item.equipo_tag || item.usuario?.equipos?.tag || '';
+            // Usar los datos almacenados directamente en el historial
+            const adminNombre = item.admin_nombre || item.admin_usuario || 'Sistema';
+            const usuarioNombre = item.usuario_nombre || 'Usuario eliminado';
             
             let tipoBadge = '';
             let badgeClass = '';
@@ -149,8 +140,9 @@ class HistorialManager {
                 badgeClass = 'badge-success';
             }
 
-            const eventoInfo = item.evento_nombre ? `<br><small>Evento: ${item.evento_nombre}</small>` : '';
-            const detallesInfo = item.detalles ? `<br><small>${item.detalles}</small>` : '';
+            const eventoInfo = item.evento_nombre ? `<br><small class="evento-info">Evento: ${item.evento_nombre}</small>` : '';
+            const detallesInfo = item.detalles ? `<br><small class="detalles-info">${item.detalles}</small>` : '';
+            const equipoInfo = item.equipo_tag ? `<br><small class="equipo-info"><span class="tag-badge">#${item.equipo_tag}</span> ${item.equipo_nombre || ''}</small>` : '';
 
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -160,15 +152,12 @@ class HistorialManager {
                         <div class="time">${fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</div>
                     </div>
                 </td>
-                <td>${adminNombre}</td>
-                <td>${item.accion}${eventoInfo}${detallesInfo}</td>
-                <td>
-                    <div>${usuarioNombre}</div>
-                    ${equipoTag ? `<div class="team-info"><span class="tag-badge">#${equipoTag}</span> ${equipoNombre}</div>` : ''}
-                </td>
+                <td><strong>${adminNombre}</strong></td>
+                <td>${usuarioNombre}${equipoInfo}</td>
                 <td class="points-change ${item.cantidad > 0 ? 'positive' : item.cantidad === 0 ? 'neutral' : 'negative'}">
                     ${item.cantidad > 0 ? '+' : ''}${item.cantidad}
                 </td>
+                <td>${item.accion}${eventoInfo}${detallesInfo}</td>
                 <td><span class="badge ${badgeClass}">${tipoBadge}</span></td>
             `;
 
@@ -180,17 +169,24 @@ class HistorialManager {
         this.renderHistorial(filterType);
     }
 
-    async registrarPuntos(adminId, adminUsuario, adminNombre, usuarioId, usuarioNombre, equipoId, equipoNombre, equipoTag, cantidad, tipoPuntos, accion, eventoNombre = null, detalles = null) {
+    // MÉTODO PRINCIPAL PARA REGISTRAR EN HISTORIAL
+    async registrarPuntos(admin, usuario, cantidad, tipoPuntos, accion, eventoNombre = null, detalles = null) {
         try {
+            // Si no hay admin (modo público), no registrar
+            if (!admin) {
+                console.log('⚠️ No se registró historial - Sin administrador');
+                return;
+            }
+
             const historialData = {
-                admin_id: adminId,
-                admin_usuario: adminUsuario,
-                admin_nombre: adminNombre,
-                usuario_id: usuarioId,
-                usuario_nombre: usuarioNombre,
-                equipo_id: equipoId,
-                equipo_nombre: equipoNombre,
-                equipo_tag: equipoTag,
+                admin_id: admin.id,
+                admin_usuario: admin.usuario,
+                admin_nombre: admin.nombre_completo || admin.usuario,
+                usuario_id: usuario ? usuario.id : null,
+                usuario_nombre: usuario ? usuario.nombre : null,
+                equipo_id: usuario && usuario.equipos ? usuario.equipos.id : null,
+                equipo_nombre: usuario && usuario.equipos ? usuario.equipos.nombre : null,
+                equipo_tag: usuario && usuario.equipos ? usuario.equipos.tag : null,
                 cantidad: cantidad,
                 tipo_puntos: tipoPuntos,
                 accion: accion,
@@ -199,7 +195,7 @@ class HistorialManager {
                 fecha_registro: new Date().toISOString()
             };
 
-            console.log('📝 Registrando historial:', historialData);
+            console.log('📝 Registrando en historial:', historialData);
 
             const { error } = await window.supabaseClient
                 .from('historial_puntos')
@@ -216,6 +212,7 @@ class HistorialManager {
 
         } catch (error) {
             console.error('❌ Error registrando historial:', error);
+            // No mostrar notificación para no interrumpir el flujo principal
         }
     }
 
@@ -225,39 +222,12 @@ class HistorialManager {
         
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="loading-row">
+                <td colspan="6" class="loading-row">
                     <div class="loading-spinner-small"></div>
                     Cargando historial...
                 </td>
             </tr>
         `;
-    }
-
-    hideLoading() {
-        // Se maneja en renderHistorial
-    }
-
-    // Método helper para registrar desde otros managers
-    async registrarDesdeUsuarios(admin, usuario, cantidad, tipoPuntos, accion, eventoNombre = null, detalles = null) {
-        if (!admin || !usuario) return;
-        
-        const equipoInfo = usuario.equipos || {};
-        
-        await this.registrarPuntos(
-            admin.id,
-            admin.usuario,
-            admin.nombre_completo || admin.usuario,
-            usuario.id,
-            usuario.nombre,
-            usuario.equipo_id,
-            equipoInfo.nombre,
-            equipoInfo.tag,
-            cantidad,
-            tipoPuntos,
-            accion,
-            eventoNombre,
-            detalles
-        );
     }
 }
 

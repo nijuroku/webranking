@@ -51,6 +51,7 @@ class UsuarioManager {
     });
   }
 
+  // MÉTODO agregarUsuario - ACTUALIZADO
   async agregarUsuario(nombre, equipoId, puntosIniciales = 0) {
     if (!window.authManager.hasAccess(1)) {
       window.authManager.showNotification(
@@ -61,6 +62,18 @@ class UsuarioManager {
     }
 
     try {
+      // Obtener información del equipo si existe
+      let equipoInfo = null;
+      if (equipoId) {
+        const { data: equipoData } = await window.supabaseClient
+          .from("equipos")
+          .select("*")
+          .eq("id", equipoId)
+          .single();
+        equipoInfo = equipoData;
+      }
+
+      // Crear usuario
       const { data, error } = await window.supabaseClient
         .from("usuarios")
         .insert([
@@ -74,22 +87,33 @@ class UsuarioManager {
 
       if (error) throw error;
 
-      window.authManager.showNotification(`Usuario "${nombre}" agregado correctamente`, 'success');
+      const nuevoUsuario = data[0];
+      window.authManager.showNotification(
+        `Usuario "${nombre}" agregado correctamente`,
+        "success"
+      );
 
-      // Registrar en historial si hay puntos iniciales
-      if (puntosIniciales > 0 && window.historialManager && window.authManager.getCurrentUser()) {
-        const newUser = data[0];
-        await window.historialManager.registrarDesdeUsuarios(
-            window.authManager.getCurrentUser(),
-            newUser,
-            parseInt(puntosIniciales),
-            'inicial',
-            'Puntos iniciales al crear usuario'
+      // REGISTRAR EN HISTORIAL SI HAY PUNTOS INICIALES - CORREGIDO
+      if (puntosIniciales > 0 && window.historialManager) {
+        const admin = window.authManager.getCurrentUser();
+        const usuarioConEquipo = {
+          ...nuevoUsuario,
+          equipos: equipoInfo,
+        };
+
+        await window.historialManager.registrarPuntos(
+          admin,
+          usuarioConEquipo,
+          parseInt(puntosIniciales),
+          "inicial",
+          "Puntos iniciales al crear usuario"
         );
-    }
+      }
 
       await this.loadUsuarios();
-      await window.rankingManager.loadRankingMain();
+      if (window.rankingManager) {
+        await window.rankingManager.loadRankingMain();
+      }
       return true;
     } catch (error) {
       console.error("Error adding user:", error);
@@ -137,41 +161,44 @@ class UsuarioManager {
 
       if (error) throw error;
 
-      const usuarioNombre = this.usuarios.find(
-        (u) => u.id === usuarioId
-      )?.nombre;
+      // Obtener información completa del usuario para el historial
+      const { data: usuarioCompleto, error: errorUsuario } =
+        await window.supabaseClient
+          .from("usuarios")
+          .select(
+            `
+                *,
+                equipos (id, nombre, tag)
+            `
+          )
+          .eq("id", usuarioId)
+          .single();
+
+      const usuarioNombre =
+        usuarioCompleto?.nombre ||
+        this.usuarios.find((u) => u.id === usuarioId)?.nombre;
+
       window.authManager.showNotification(
-        `${puntos} puntos sumados a ${usuarioNombre}`, 'success'
-    );
-    
-    // Registrar en historial
-    if (window.historialManager && window.authManager.getCurrentUser()) {
-        const usuario = this.usuarios.find(u => u.id === usuarioId);
-        await window.historialManager.registrarDesdeUsuarios(
-            window.authManager.getCurrentUser(),
-            usuario,
-            parseInt(puntos),
-            'main',
-            'Suma de puntos main'
+        `${puntos} puntos sumados a ${usuarioNombre}`,
+        "success"
+      );
+
+      // REGISTRAR EN HISTORIAL - CORREGIDO
+      if (window.historialManager) {
+        const admin = window.authManager.getCurrentUser();
+        await window.historialManager.registrarPuntos(
+          admin,
+          usuarioCompleto || { id: usuarioId, nombre: usuarioNombre },
+          parseInt(puntos),
+          "main",
+          "Suma de puntos principales"
         );
-    }window.authManager.showNotification(
-        `${puntos} puntos sumados a ${usuarioNombre}`, 'success'
-    );
-    
-    // Registrar en historial
-    if (window.historialManager && window.authManager.getCurrentUser()) {
-        const usuario = this.usuarios.find(u => u.id === usuarioId);
-        await window.historialManager.registrarDesdeUsuarios(
-            window.authManager.getCurrentUser(),
-            usuario,
-            parseInt(puntos),
-            'main',
-            'Suma de puntos main'
-        );
-    }
+      }
 
       await this.loadUsuarios();
-      await window.rankingManager.loadRankingMain();
+      if (window.rankingManager) {
+        await window.rankingManager.loadRankingMain();
+      }
       return true;
     } catch (error) {
       console.error("Error adding points:", error);
@@ -180,8 +207,27 @@ class UsuarioManager {
     }
   }
 
+  // MÉTODO sumarPuntosExtra - ACTUALIZADO
   async sumarPuntosExtra(usuarioId, puntos, evento) {
     try {
+      // Obtener información del usuario primero para el historial
+      const { data: usuarioData, error: errorUsuario } =
+        await window.supabaseClient
+          .from("usuarios")
+          .select(
+            `
+                *,
+                equipos (id, nombre, tag)
+            `
+          )
+          .eq("id", usuarioId)
+          .single();
+
+      if (errorUsuario) {
+        throw errorUsuario;
+      }
+
+      // Insertar puntos extra
       const { data, error } = await window.supabaseClient
         .from("ranking_extra")
         .insert([
@@ -195,27 +241,30 @@ class UsuarioManager {
 
       if (error) throw error;
 
-      const usuarioNombre = this.usuarios.find(
-        (u) => u.id === usuarioId
-      )?.nombre;
       window.authManager.showNotification(
-        `${puntos} puntos extra sumados a ${usuarioNombre}`,
+        `${puntos} puntos extra sumados a ${usuarioData.nombre}`,
         "success"
       );
 
-      // Registrar en historial
-      if (window.historialManager && window.authManager.getCurrentUser()) {
-        await window.historialManager.registrarPuntos(
-          window.authManager.getCurrentUser().id,
-          usuarioId,
-          parseInt(puntos),
-          "extra",
-          `Suma de puntos extra (${evento})`,
-          evento
-        );
+      // REGISTRAR EN HISTORIAL - CORREGIDO
+      if (window.historialManager) {
+        const admin = window.authManager.getCurrentUser();
+        // Si no hay admin (modo público), no registrar
+        if (admin) {
+          await window.historialManager.registrarPuntos(
+            admin,
+            usuarioData,
+            parseInt(puntos),
+            "extra",
+            "Suma de puntos extra",
+            evento
+          );
+        }
       }
 
-      await window.rankingManager.loadRankingExtra();
+      if (window.rankingManager) {
+        await window.rankingManager.loadRankingExtra();
+      }
       return true;
     } catch (error) {
       console.error("Error adding extra points:", error);
@@ -315,6 +364,7 @@ class UsuarioManager {
     }
   }
 
+  // MÉTODO eliminarUsuario - AGREGAR HISTORIAL
   async eliminarUsuario(usuarioId) {
     if (!window.authManager.hasAccess(1)) {
       window.authManager.showNotification(
@@ -332,6 +382,19 @@ class UsuarioManager {
     }
 
     try {
+      // Primero obtener información completa para el historial
+      const { data: usuarioCompleto, error: errorUsuario } =
+        await window.supabaseClient
+          .from("usuarios")
+          .select(
+            `
+                *,
+                equipos (id, nombre, tag)
+            `
+          )
+          .eq("id", usuarioId)
+          .single();
+
       // Primero eliminar puntos extra
       await window.supabaseClient
         .from("ranking_extra")
@@ -350,8 +413,25 @@ class UsuarioManager {
         `Usuario "${usuario.nombre}" eliminado correctamente`,
         "success"
       );
+
+      // REGISTRAR EN HISTORIAL - CORREGIDO
+      if (window.historialManager && usuarioCompleto) {
+        const admin = window.authManager.getCurrentUser();
+        await window.historialManager.registrarPuntos(
+          admin,
+          usuarioCompleto,
+          0,
+          "limpieza",
+          "Usuario eliminado del sistema",
+          null,
+          `Se eliminó el usuario "${usuario.nombre}" y todos sus puntos`
+        );
+      }
+
       await this.loadUsuarios();
-      await window.rankingManager.loadRankingMain();
+      if (window.rankingManager) {
+        await window.rankingManager.loadRankingMain();
+      }
       return true;
     } catch (error) {
       console.error("Error deleting user:", error);

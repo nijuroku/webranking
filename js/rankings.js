@@ -191,6 +191,14 @@ class RankingManager {
     }
 
     try {
+      // Primero obtener conteo de registros a eliminar para el historial
+      const { count, error: countError } = await window.supabaseClient
+        .from("ranking_extra")
+        .select("*", { count: "exact", head: true })
+        .eq("evento_nombre", evento);
+
+      if (countError) throw countError;
+
       const { error } = await window.supabaseClient
         .from("ranking_extra")
         .delete()
@@ -198,26 +206,24 @@ class RankingManager {
 
       if (error) throw error;
 
-      window.authManager.showNotification(`Ranking extra "${evento}" limpiado correctamente`, 'success');
+      window.authManager.showNotification(
+        `Ranking extra "${evento}" limpiado correctamente`,
+        "success"
+      );
 
-      // Registrar en historial
-      if (window.historialManager && window.authManager.getCurrentUser()) {
+      // REGISTRAR EN HISTORIAL - CORREGIDO
+      if (window.historialManager) {
+        const admin = window.authManager.getCurrentUser();
         await window.historialManager.registrarPuntos(
-            window.authManager.getCurrentUser().id,
-            window.authManager.getCurrentUser().usuario,
-            window.authManager.getCurrentUser().nombre_completo || window.authManager.getCurrentUser().usuario,
-            null, // No hay usuario específico
-            null, // No hay nombre de usuario
-            null, // No hay equipo
-            null, // No hay nombre de equipo
-            null, // No hay tag de equipo
-            0, // Cantidad 0 para limpieza
-            'limpieza',
-            `Limpieza completa del ranking extra`,
-            evento,
-            `Todos los puntos del evento "${evento}" fueron eliminados`
+          admin,
+          null, // No hay usuario específico
+          0, // Cantidad 0 para limpieza
+          "limpieza",
+          "Limpieza completa del ranking extra",
+          evento,
+          `Se eliminaron ${count || 0} registros del evento "${evento}"`
         );
-    }
+      }
 
       this.loadRankingExtra();
     } catch (error) {
