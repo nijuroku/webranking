@@ -1,5 +1,5 @@
 :root {
-    --primary: #4361ee;
+    --primary: #8c8c8f;
     --primary-dark: #3a0ca3;
     --secondary: #4cc9f0;
     --success: #2ecc71;
@@ -21,7 +21,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #48445c 0%, #100e20 100%);
     min-height: 100vh;
     color: var(--dark);
 }
@@ -71,7 +71,7 @@ body {
 }
 /* Header */
 .header {
-    background: white;
+    background: #140f27;
     box-shadow: var(--shadow);
     position: sticky;
     top: 0;
@@ -100,16 +100,17 @@ body {
 
 .header-titles h1 {
     font-size: 1.5rem;
-    color: var(--dark);
+    color: whitesmoke;
     margin-bottom: 0.2rem;
 }
 
 .subtitle {
-    color: var(--gray);
+    color: whitesmoke;
     font-size: 0.9rem;
 }
 
 .header-controls {
+    color: whitesmoke;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -132,7 +133,7 @@ body {
 
 /* Navigation */
 .tabs-nav {
-    background: white;
+    background: #2f2b3d;
     border-bottom: 1px solid var(--border);
 }
 
@@ -162,7 +163,7 @@ body {
 
 .tab-btn.active {
     border-bottom-color: var(--primary);
-    color: var(--primary);
+    color: whitesmoke;
     font-weight: bold;
 }
 
@@ -224,7 +225,7 @@ body {
 
 .card-header {
     padding: 1.5rem;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    background: linear-gradient(135deg, #48445c 0%, #100e20 100%);
     color: white;
     display: flex;
     justify-content: space-between;
@@ -337,15 +338,17 @@ table {
 }
 
 th, td {
+    color: rgb(29, 23, 41);
+    background: #a3a0b6;
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--border);
 }
 
 th {
-    background: #f8f9fa;
+    color: whitesmoke;
+    background: #605779;
     font-weight: 600;
-    color: var(--dark);
 }
 
 tbody tr:hover {
@@ -502,14 +505,13 @@ tbody tr:hover {
 }
 /* Footer */
 .footer {
-    background: white;
+    background: #050818;
     border-top: 1px solid var(--border);
     padding: 1rem 2rem;
     margin-top: 2rem;
     position: sticky;
     bottom: 0;
     width: 100%;
-    background: white;
     z-index: 100;
 }
 
