@@ -363,7 +363,7 @@ class AuthManager {
       // Ocultar pestañas de administración
       this.hideAdminTabs();
     } else {
-      // Modo administrador
+      // Modo administrador (nivel 1 o 2)
       const nombreMostrar =
         this.currentUser.nombre_completo || this.currentUser.usuario;
 
@@ -381,10 +381,22 @@ class AuthManager {
         logoutBtn.className = "btn btn-outline";
       }
 
-      // Mostrar pestañas de admin según nivel
+      // MODIFICACIÓN AQUÍ: Mostrar adminTabs para nivel 1 y 2
       if (adminTabs) {
-        if (this.userLevel >= 2) {
+        if (this.userLevel >= 1) {
           adminTabs.style.display = "block";
+
+          // Ocultar pestaña de administradores si no es super admin
+          const adminTabBtn = document.querySelector(
+            '[data-tab="administradores"]'
+          );
+          if (adminTabBtn) {
+            if (this.userLevel < 2) {
+              adminTabBtn.style.display = "none";
+            } else {
+              adminTabBtn.style.display = "inline-flex";
+            }
+          }
         } else {
           adminTabs.style.display = "none";
         }
@@ -394,7 +406,7 @@ class AuthManager {
 
   hideAdminTabs() {
     // Ocultar pestañas de administración
-    const adminTabIds = ["usuarios", "gestion-usuarios", "administradores"];
+    const adminTabIds = ["gestion-usuarios", "administradores"];
     adminTabIds.forEach((tabId) => {
       const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
       if (tabBtn) {
@@ -426,7 +438,29 @@ class AuthManager {
 
     // Actualizar botones de navegación
     document.querySelectorAll(".tab-btn").forEach((btn) => {
-      btn.classList.remove("active");
+      btn.addEventListener("click", () => {
+        const tabName = btn.getAttribute("data-tab");
+
+        // Verificar permisos para pestañas admin
+        if (tabName === "administradores" && this.userLevel < 2) {
+          this.showNotification(
+            "Se requiere Super Admin para acceder a esta sección",
+            "error"
+          );
+          return;
+        }
+
+        // MODIFICACIÓN AQUÍ: Cambiar de nivel 2 a nivel 1
+        if (tabName === "gestion-usuarios" && this.userLevel < 1) {
+          this.showNotification(
+            "Se requiere Admin para acceder a esta sección",
+            "error"
+          );
+          return;
+        }
+
+        this.switchTab(tabName);
+      });
     });
 
     const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
@@ -440,6 +474,7 @@ class AuthManager {
       this.loadTabData(tabName);
     }, 100);
   }
+
   // En el método loadTabData, agrega el caso para brackets
   loadTabData(tabName) {
     console.log(`📌 Cargando datos para pestaña: ${tabName}`);
