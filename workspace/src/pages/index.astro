@@ -1,0 +1,150 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="🏆 Sistema de Clasificación">
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+      <!-- Logo -->
+      <div class="text-center mb-8">
+        <div class="text-5xl mb-4">🏆</div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Sistema de Clasificación</h1>
+        <p class="text-gray-600">Gestión de rankings y equipos</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="space-y-5 mb-6">
+        <div>
+          <label for="loginUser" class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-user mr-2"></i> Usuario:
+          </label>
+          <input
+            type="text"
+            id="loginUser"
+            required
+            placeholder="Ingresa tu usuario"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-lock mr-2"></i> Contraseña:
+          </label>
+          <input
+            type="password"
+            id="loginPassword"
+            required
+            placeholder="Ingresa tu contraseña"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <i class="fas fa-sign-in-alt mr-2"></i> Iniciar Sesión
+        </button>
+      </form>
+
+      <!-- Demo Users Info -->
+      <div class="border-t pt-4 mb-6">
+        <p class="text-sm text-gray-700 font-semibold mb-2">👥 Usuarios de Prueba:</p>
+        <div class="space-y-2 text-xs bg-gray-50 p-3 rounded">
+          <div><strong>Admin:</strong> usuario: "admin" | contraseña: "admin123"</div>
+          <div><strong>Super Admin:</strong> usuario: "superadmin" | contraseña: "super123"</div>
+          <div><strong>Usuario:</strong> usuario: "usuario1" | contraseña: "user123"</div>
+        </div>
+      </div>
+
+      <!-- Public Access -->
+      <div class="border-t pt-6">
+        <p class="text-center text-gray-600 mb-4">¿Solo quieres ver los rankings?</p>
+        <button
+          id="publicAccessBtn"
+          class="w-full bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition-colors"
+        >
+          <i class="fas fa-eye mr-2"></i> Acceder como Público
+        </button>
+      </div>
+
+      <!-- Info Message -->
+      <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
+        <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+        <p class="text-sm text-blue-800">Usa los usuarios de prueba para acceder</p>
+      </div>
+
+      <!-- Alert Messages -->
+      <div id="alertContainer" class="mt-6"></div>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const publicAccessBtn = document.getElementById('publicAccessBtn');
+    const alertContainer = document.getElementById('alertContainer');
+
+    // Demo users
+    const demoUsers = {
+      admin: { password: 'admin123', nivel: 1, name: 'Administrador' },
+      superadmin: { password: 'super123', nivel: 2, name: 'Super Administrador' },
+      usuario1: { password: 'user123', nivel: 0, name: 'Usuario de Prueba' },
+    };
+
+    function showAlert(message, type = 'error') {
+      const alertDiv = document.createElement('div');
+      const bgColor = type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-green-50 border-green-200 text-green-800';
+      const icon = type === 'error' ? 'fa-times-circle' : 'fa-check-circle';
+      
+      alertDiv.innerHTML = `
+        <div class="p-4 border rounded-lg ${bgColor}">
+          <i class="fas ${icon} mr-2"></i>${message}
+        </div>
+      `;
+      
+      alertContainer.innerHTML = '';
+      alertContainer.appendChild(alertDiv);
+
+      if (type === 'success') {
+        setTimeout(() => {
+          window.location.href = '/app';
+        }, 1500);
+      }
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const user = document.getElementById('loginUser').value.toLowerCase();
+      const password = document.getElementById('loginPassword').value;
+
+      // Check demo users
+      if (demoUsers[user] && demoUsers[user].password === password) {
+        const userData = {
+          username: user,
+          name: demoUsers[user].name,
+          nivel: demoUsers[user].nivel,
+          timestamp: new Date().toISOString(),
+        };
+        
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        showAlert(`¡Bienvenido ${userData.name}!`, 'success');
+      } else {
+        showAlert('Usuario o contraseña incorrectos. Usa los datos de prueba arriba.');
+      }
+    });
+
+    publicAccessBtn.addEventListener('click', () => {
+      const userData = {
+        username: 'public',
+        name: 'Usuario Público',
+        nivel: -1,
+        timestamp: new Date().toISOString(),
+      };
+      
+      localStorage.setItem('currentUser', JSON.stringify(userData));
+      showAlert('¡Acceso público activado!', 'success');
+    });
+  </script>
+</Layout>

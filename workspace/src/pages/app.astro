@@ -1,0 +1,192 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import RankingMain from '../components/RankingMain.astro';
+import RankingExtra from '../components/RankingExtra.astro';
+import EquiposSection from '../components/EquiposSection.astro';
+import PuntosSection from '../components/PuntosSection.astro';
+import UsuariosSection from '../components/UsuariosSection.astro';
+import AdminSection from '../components/AdminSection.astro';
+---
+
+<AppLayout>
+  <!-- Ranking Main -->
+  <div id="ranking-main" class="tab-content fade-in">
+    <RankingMain />
+  </div>
+
+  <!-- Ranking Extra -->
+  <div id="ranking-extra" class="tab-content hidden">
+    <RankingExtra />
+  </div>
+
+  <!-- Equipos -->
+  <div id="equipos" class="tab-content hidden">
+    <EquiposSection />
+  </div>
+
+  <!-- Puntos -->
+  <div id="puntos" class="tab-content hidden">
+    <PuntosSection />
+  </div>
+
+  <!-- Gestión de Usuarios -->
+  <div id="gestion-usuarios" class="tab-content hidden">
+    <UsuariosSection />
+  </div>
+
+  <!-- Administradores -->
+  <div id="administradores" class="tab-content hidden">
+    <AdminSection />
+  </div>
+
+  <script>
+    // Load user from localStorage
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    
+    if (!currentUser.username) {
+      window.location.href = '/';
+    }
+
+    // Update header with user info
+    const userName = document.getElementById('userName');
+    const userBadge = document.getElementById('userBadge');
+    
+    if (userName) userName.textContent = currentUser.name || 'Usuario';
+    if (userBadge) {
+      userBadge.textContent = currentUser.nivel === 2 ? 'Super Admin' : currentUser.nivel === 1 ? 'Admin' : 'Usuario';
+    }
+
+    // Logout button
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn?.addEventListener('click', () => {
+      localStorage.removeItem('currentUser');
+      window.location.href = '/';
+    });
+
+    // Tab switching logic
+    const tabs = document.querySelectorAll('[data-tab]');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Hide admin tabs if not admin
+    const adminTabs = document.querySelectorAll('[data-tab="puntos"], [data-tab="gestion-usuarios"]');
+    const superAdminTabs = document.querySelectorAll('[data-tab="administradores"]');
+
+    adminTabs.forEach(tab => {
+      if (currentUser.nivel < 1) {
+        (tab as HTMLElement).style.display = 'none';
+      }
+    });
+
+    superAdminTabs.forEach(tab => {
+      if (currentUser.nivel < 2) {
+        (tab as HTMLElement).style.display = 'none';
+      }
+    });
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', (e) => {
+        const tabId = (e.currentTarget as HTMLElement).getAttribute('data-tab');
+
+        // Hide all tabs
+        tabContents.forEach((content) => {
+          (content as HTMLElement).classList.add('hidden');
+          (content as HTMLElement).classList.remove('fade-in');
+        });
+
+        // Remove active class from all tabs
+        tabs.forEach((t) => {
+          t.classList.remove('border-blue-600', 'text-blue-600');
+          t.classList.add('border-transparent', 'text-gray-600');
+        });
+
+        // Show selected tab
+        const selectedContent = document.getElementById(tabId || '');
+        if (selectedContent) {
+          selectedContent.classList.remove('hidden');
+          selectedContent.classList.add('fade-in');
+        }
+
+        // Add active class to clicked tab
+        (e.currentTarget as HTMLElement).classList.remove('border-transparent', 'text-gray-600');
+        (e.currentTarget as HTMLElement).classList.add('border-blue-600', 'text-blue-600');
+      });
+    });
+
+    // Load sample data for rankings
+    function loadSampleData() {
+      const mainData = [
+        { posicion: 1, tag: 'BEY1', usuario: 'Usuario 1', equipo: 'Equipo A', puntos: 1250, tendencia: '↑' },
+        { posicion: 2, tag: 'BEY2', usuario: 'Usuario 2', equipo: 'Equipo B', puntos: 1180, tendencia: '↓' },
+        { posicion: 3, tag: 'BEY3', usuario: 'Usuario 3', equipo: 'Equipo C', puntos: 1050, tendencia: '→' },
+        { posicion: 4, tag: 'BEY4', usuario: 'Usuario 4', equipo: 'Equipo D', puntos: 950, tendencia: '↑' },
+        { posicion: 5, tag: 'BEY5', usuario: 'Usuario 5', equipo: 'Equipo E', puntos: 850, tendencia: '↓' },
+      ];
+
+      const tbodyMain = document.getElementById('tbodyMain');
+      if (tbodyMain) {
+        tbodyMain.innerHTML = mainData.map(row => `
+          <tr>
+            <td class="font-bold text-lg text-blue-600">${row.posicion}</td>
+            <td class="font-semibold">${row.tag}</td>
+            <td>${row.usuario}</td>
+            <td>${row.equipo}</td>
+            <td class="font-bold">${row.puntos}</td>
+            <td class="text-2xl">${row.tendencia}</td>
+          </tr>
+        `).join('');
+      }
+
+      const extraData = [
+        { posicion: 1, tag: 'BEY1', usuario: 'Usuario 1', equipo: 'Equipo A', puntos: 450, evento: 'Evento For Fun' },
+        { posicion: 2, tag: 'BEY2', usuario: 'Usuario 2', equipo: 'Equipo B', puntos: 380, evento: 'Evento For Fun' },
+        { posicion: 3, tag: 'BEY3', usuario: 'Usuario 3', equipo: 'Equipo C', puntos: 320, evento: 'Evento For Fun' },
+      ];
+
+      const tbodyExtra = document.getElementById('tbodyExtra');
+      if (tbodyExtra) {
+        tbodyExtra.innerHTML = extraData.map(row => `
+          <tr>
+            <td class="font-bold text-lg text-yellow-600">${row.posicion}</td>
+            <td class="font-semibold">${row.tag}</td>
+            <td>${row.usuario}</td>
+            <td>${row.equipo}</td>
+            <td class="font-bold">${row.puntos}</td>
+            <td>${row.evento}</td>
+          </tr>
+        `).join('');
+      }
+
+      const equiposData = [
+        { equipo: 'Equipo A', tag: 'EQA', miembros: 5, puntos: 3200 },
+        { equipo: 'Equipo B', tag: 'EQB', miembros: 4, puntos: 2950 },
+        { equipo: 'Equipo C', tag: 'EQC', miembros: 6, puntos: 2850 },
+        { equipo: 'Equipo D', tag: 'EQD', miembros: 3, puntos: 2450 },
+      ];
+
+      const tbodyEquipos = document.getElementById('tbodyEquipos');
+      if (tbodyEquipos) {
+        tbodyEquipos.innerHTML = equiposData.map(row => `
+          <tr>
+            <td class="font-semibold">${row.equipo}</td>
+            <td class="font-bold text-blue-600">${row.tag}</td>
+            <td>${row.miembros}</td>
+            <td class="font-bold">${row.puntos}</td>
+            <td>
+              <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Ver</button>
+              <button class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 ml-2">Eliminar</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    loadSampleData();
+  </script>
+
+  <style>
+    .hidden {
+      display: none;
+    }
+  </style>
+</AppLayout>
+

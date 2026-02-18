@@ -11,11 +11,50 @@ class AuthManager {
     // Ocultar loading inmediatamente
     this.hideLoading();
 
-    // Configurar event listeners primero
+    // Esperar a que Supabase esté listo
+    await this.waitForSupabase();
+
+    // Configurar event listeners
     this.setupEventListeners();
 
     // Intentar cargar sesión existente
     await this.checkExistingSession();
+  }
+
+  async waitForSupabase() {
+    console.log("⏳ Esperando inicialización de Supabase...");
+
+    // Si ya está disponible, continuar
+    if (window.supabaseClient) {
+      console.log("✅ Supabase ya está disponible");
+      return;
+    }
+
+    // Esperar máximo 5 segundos
+    const maxWaitTime = 5000; // 5 segundos
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+      const checkSupabase = () => {
+        if (window.supabaseClient) {
+          console.log(
+            "✅ Supabase cargado después de " + (Date.now() - startTime) + "ms"
+          );
+          resolve();
+        } else if (Date.now() - startTime > maxWaitTime) {
+          console.error("❌ Timeout esperando Supabase");
+          window.authManager?.showNotification(
+            "Error de conexión con la base de datos",
+            "error"
+          );
+          resolve();
+        } else {
+          setTimeout(checkSupabase, 100);
+        }
+      };
+
+      checkSupabase();
+    });
   }
 
   async checkExistingSession() {
@@ -257,10 +296,15 @@ class AuthManager {
         console.log("✅ Rankings cargados");
       }
 
-      // Cargar equipos
+      // Cargar equipos (SOLO UNA VEZ)
       if (window.equipoManager) {
-        await window.equipoManager.loadEquipos();
-        console.log("✅ Equipos cargados");
+        // Solo cargar si no se ha cargado antes
+        if (window.equipoManager.equipos.length === 0) {
+          await window.equipoManager.loadEquipos();
+          console.log("✅ Equipos cargados");
+        } else {
+          console.log("✅ Equipos ya cargados anteriormente");
+        }
       }
 
       // Cargar usuarios
@@ -370,7 +414,7 @@ class AuthManager {
       if (userName) userName.textContent = nombreMostrar;
 
       if (userBadge) {
-        userBadge.textContent = this.userLevel >= 2 ? "Super Admin" : "Admin";
+        userBadge.textContent = this.userLevel >= 2 ? "Admin+" : "Admin";
         userBadge.className =
           "user-badge " + (this.userLevel >= 2 ? "super-admin" : "admin");
       }
@@ -475,7 +519,6 @@ class AuthManager {
     }, 100);
   }
 
-  // En el método loadTabData, agrega el caso para brackets
   loadTabData(tabName) {
     console.log(`📌 Cargando datos para pestaña: ${tabName}`);
 
@@ -486,11 +529,21 @@ class AuthManager {
       case "ranking-extra":
         if (window.rankingManager) window.rankingManager.loadRankingExtra();
         break;
-      case "usuarios":
-        if (window.usuarioManager) window.usuarioManager.loadUsuarios();
+      case "puntos":
+        // No necesita cargar datos especiales, los selects se cargan automáticamente
         break;
       case "equipos":
-        if (window.equipoManager) window.equipoManager.loadEquipos();
+        if (window.equipoManager) {
+          // Solo cargar si la pestaña está vacía o si se fuerza recarga
+          const tbody = document.getElementById("tbodyEquipos");
+          if (
+            !tbody ||
+            tbody.children.length === 0 ||
+            (tbody.children.length === 1 && tbody.querySelector(".no-data"))
+          ) {
+            window.equipoManager.loadEquipos();
+          }
+        }
         break;
       case "gestion-usuarios":
         // Los datos de usuarios ya se cargan cuando se selecciona un usuario
@@ -502,7 +555,6 @@ class AuthManager {
         break;
       case "brackets":
         if (window.bracketsManager) {
-          // Cargar brackets (esto es síncrono)
           window.bracketsManager.loadBrackets();
         }
         break;

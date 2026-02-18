@@ -1,0 +1,186 @@
+---
+import Card from './Card.astro';
+import FormField from './FormField.astro';
+import Table from './Table.astro';
+---
+
+<div class="grid md:grid-cols-2 gap-6">
+  <Card title="Crear Nuevo Equipo" icon="plus">
+    <form id="formCrearEquipo" class="space-y-4">
+      <FormField
+        label="Nombre del Equipo:"
+        name="nuevoEquipoNombre"
+        required
+        placeholder="Nombre del equipo"
+      />
+      <FormField
+        label="TAG (máx 5 letras):"
+        name="nuevoEquipoTag"
+        required
+        placeholder="TAG único"
+      />
+      <div id="alertCrearEquipo"></div>
+      <button
+        type="submit"
+        class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+      >
+        <i class="fas fa-plus mr-2"></i> Crear Equipo
+      </button>
+    </form>
+  </Card>
+
+  <Card title="Equipos Existentes" icon="list">
+    <Table>
+      <thead>
+        <tr>
+          <th>Equipo</th>
+          <th>TAG</th>
+          <th>Miembros</th>
+          <th>Puntos Totales</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyEquipos">
+        <tr>
+          <td colspan="5" class="text-center py-8 text-gray-500">
+            <i class="fas fa-spinner-third spin-slow mr-2"></i> Cargando equipos...
+          </td>
+        </tr>
+      </tbody>
+    </Table>
+  </Card>
+</div>
+
+<script>
+  // Equipos de prueba inicial
+  const equiposIniciales = [
+    { nombre: 'Equipo A', tag: 'EQA', miembros: 5, puntos: 3200, id: 1 },
+    { nombre: 'Equipo B', tag: 'EQB', miembros: 4, puntos: 2950, id: 2 },
+    { nombre: 'Equipo C', tag: 'EQC', miembros: 6, puntos: 2850, id: 3 },
+    { nombre: 'Equipo D', tag: 'EQD', miembros: 3, puntos: 2450, id: 4 },
+  ];
+
+  // Cargar equipos desde sessionStorage
+  let equipos = JSON.parse(sessionStorage.getItem('equipos') || JSON.stringify(equiposIniciales));
+
+  // Función para mostrar alertas
+  function showAlert(container, message, type = 'error') {
+    const alertDiv = document.createElement('div');
+    const bgColor = type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-green-50 border-green-200 text-green-800';
+    const icon = type === 'error' ? 'fa-times-circle' : 'fa-check-circle';
+    
+    alertDiv.innerHTML = `
+      <div class="p-3 border rounded-lg ${bgColor} text-sm">
+        <i class="fas ${icon} mr-2"></i>${message}
+      </div>
+    `;
+    
+    container.innerHTML = '';
+    container.appendChild(alertDiv);
+    
+    setTimeout(() => {
+      alertDiv.remove();
+    }, 4000);
+  }
+
+  // Cargar y mostrar equipos en tabla
+  function loadEquipos() {
+    const tbodyEquipos = document.getElementById('tbodyEquipos');
+    
+    if (equipos.length === 0) {
+      tbodyEquipos.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center py-8 text-gray-500">
+            No hay equipos registrados
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbodyEquipos.innerHTML = equipos.map((equipo, idx) => `
+      <tr>
+        <td class="font-semibold">${equipo.nombre}</td>
+        <td class="font-bold text-blue-600">${equipo.tag}</td>
+        <td>${equipo.miembros}</td>
+        <td class="font-bold">${equipo.puntos}</td>
+        <td>
+          <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Ver</button>
+          <button class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 ml-2" onclick="window.eliminarEquipo(${idx})">Eliminar</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Función para eliminar equipo
+  window.eliminarEquipo = function(idx) {
+    if (confirm(`¿Estás seguro de que quieres eliminar el equipo "${equipos[idx].nombre}"?`)) {
+      const equipoEliminado = equipos[idx].nombre;
+      equipos.splice(idx, 1);
+      sessionStorage.setItem('equipos', JSON.stringify(equipos));
+      loadEquipos();
+      showAlert(document.getElementById('alertCrearEquipo'), `Equipo "${equipoEliminado}" eliminado correctamente`, 'success');
+    }
+  };
+
+  // Crear equipo
+  document.getElementById('formCrearEquipo').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const nombre = document.getElementById('nuevoEquipoNombre').value.trim();
+    const tag = document.getElementById('nuevoEquipoTag').value.trim().toUpperCase();
+    const alertContainer = document.getElementById('alertCrearEquipo');
+
+    // Validaciones
+    if (!nombre) {
+      showAlert(alertContainer, 'El nombre del equipo es requerido');
+      return;
+    }
+
+    if (!tag) {
+      showAlert(alertContainer, 'El TAG del equipo es requerido');
+      return;
+    }
+
+    if (tag.length > 5) {
+      showAlert(alertContainer, 'El TAG no puede superar 5 letras');
+      return;
+    }
+
+    // Verificar si el TAG ya existe
+    if (equipos.some(eq => eq.tag === tag)) {
+      showAlert(alertContainer, `El TAG "${tag}" ya existe en otro equipo`);
+      return;
+    }
+
+    // Verificar si el nombre ya existe
+    if (equipos.some(eq => eq.nombre.toLowerCase() === nombre.toLowerCase())) {
+      showAlert(alertContainer, `El equipo "${nombre}" ya existe`);
+      return;
+    }
+
+    // Crear nuevo equipo
+    const nuevoEquipo = {
+      id: Math.max(...equipos.map(eq => eq.id || 0), 0) + 1,
+      nombre,
+      tag,
+      miembros: 0,
+      puntos: 0,
+    };
+
+    equipos.push(nuevoEquipo);
+    sessionStorage.setItem('equipos', JSON.stringify(equipos));
+    
+    // Limpiar formulario
+    document.getElementById('formCrearEquipo').reset();
+    
+    // Recargar tabla
+    loadEquipos();
+    
+    // Mostrar mensaje
+    showAlert(alertContainer, `Equipo "${nombre}" creado correctamente con TAG "${tag}"`, 'success');
+  });
+
+  // Cargar equipos al iniciar
+  loadEquipos();
+</script>

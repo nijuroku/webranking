@@ -1,0 +1,38 @@
+---
+interface Props {
+  title?: string;
+  message?: string;
+  type?: 'info' | 'success' | 'warning' | 'error';
+}
+
+const {
+  title = 'Información',
+  message = '',
+  type = 'info',
+} = Astro.props;
+
+const colors = {
+  info: 'bg-blue-50 border-blue-200 text-blue-800',
+  success: 'bg-green-50 border-green-200 text-green-800',
+  warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+  error: 'bg-red-50 border-red-200 text-red-800',
+};
+
+const icons = {
+  info: 'info-circle',
+  success: 'check-circle',
+  warning: 'exclamation-circle',
+  error: 'times-circle',
+};
+---
+
+<div class={`p-4 border rounded-lg ${colors[type]}`}>
+  <div class="flex items-start">
+    <i class={`fas fa-${icons[type]} flex-shrink-0 mt-0.5 mr-3`}></i>
+    <div>
+      {title && <h3 class="font-semibold mb-1">{title}</h3>}
+      {message && <p class="text-sm">{message}</p>}
+      <slot />
+    </div>
+  </div>
+</div>

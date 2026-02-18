@@ -121,9 +121,6 @@
           <button class="tab-btn" data-tab="ranking-extra">
             <i class="fas fa-gamepad"></i> Ranking Extra
           </button>
-          <button class="tab-btn" data-tab="usuarios">
-            <i class="fas fa-users"></i> Usuarios
-          </button>
           <button class="tab-btn" data-tab="equipos">
             <i class="fas fa-shield-alt"></i> Equipos
           </button>
@@ -131,6 +128,9 @@
           <!-- Solo para administradores (nivel 1 o superior) -->
           <div class="admin-tabs" id="adminTabs" style="display: none">
             <!-- Esta pestaña ahora es para nivel 1 -->
+            <button class="tab-btn admin-tab" data-tab="puntos">
+              <i class="fas fa-plus-circle"></i> Puntos
+            </button>
             <button class="tab-btn admin-tab" data-tab="gestion-usuarios">
               <i class="fas fa-user-cog"></i> Gestión Usuarios
             </button>
@@ -222,43 +222,9 @@
           </div>
         </div>
 
-        <!-- Gestión de Usuarios -->
-        <div id="usuarios" class="tab-content">
+        <!-- Puntos -->
+        <div id="puntos" class="tab-content">
           <div class="content-grid">
-            <!-- Agregar Usuario -->
-            <div class="card">
-              <div class="card-header">
-                <h3><i class="fas fa-user-plus"></i> Agregar Usuario</h3>
-              </div>
-              <form id="formAgregarUsuario" class="form">
-                <div class="form-group">
-                  <label for="nuevoUsuarioNombre">Nombre:</label>
-                  <input
-                    type="text"
-                    id="nuevoUsuarioNombre"
-                    required
-                    placeholder="Nombre completo del usuario"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="nuevoUsuarioEquipo">Equipo:</label>
-                  <select id="nuevoUsuarioEquipo" required>
-                    <option value="">Cargando equipos...</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="nuevoUsuarioPuntos"
-                    >Puntos Iniciales (Main):</label
-                  >
-                  <input type="number" id="nuevoUsuarioPuntos" value="0" />
-                  <!-- Elimina min="0" -->
-                </div>
-                <button type="submit" class="btn btn-success">
-                  <i class="fas fa-plus"></i> Agregar Usuario
-                </button>
-              </form>
-            </div>
-
             <!-- Sumar Puntos Main -->
             <div class="card">
               <div class="card-header">
@@ -279,7 +245,6 @@
                     required
                     placeholder="Cantidad de puntos"
                   />
-                  <!-- Elimina min="1" -->
                 </div>
                 <button type="submit" class="btn btn-primary">
                   <i class="fas fa-check"></i> Sumar Puntos
@@ -317,7 +282,6 @@
                     required
                     placeholder="Cantidad de puntos"
                   />
-                  <!-- Elimina min="1" -->
                 </div>
                 <button type="submit" class="btn btn-warning">
                   <i class="fas fa-check"></i> Sumar Puntos Extra
@@ -393,6 +357,38 @@
         <!-- Gestión de Usuarios (Admin) -->
         <div id="gestion-usuarios" class="tab-content">
           <div class="content-grid">
+            <!-- Agregar Usuario -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fas fa-user-plus"></i> Agregar Usuario</h3>
+              </div>
+              <form id="formAgregarUsuario" class="form">
+                <div class="form-group">
+                  <label for="nuevoUsuarioNombre">Nombre:</label>
+                  <input
+                    type="text"
+                    id="nuevoUsuarioNombre"
+                    required
+                    placeholder="Nombre completo del usuario"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="nuevoUsuarioEquipo">Equipo:</label>
+                  <select id="nuevoUsuarioEquipo" required>
+                    <option value="">Cargando equipos...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="nuevoUsuarioPuntos"
+                    >Puntos Iniciales (Main):</label
+                  >
+                  <input type="number" id="nuevoUsuarioPuntos" value="0" />
+                </div>
+                <button type="submit" class="btn btn-success">
+                  <i class="fas fa-plus"></i> Agregar Usuario
+                </button>
+              </form>
+            </div>
             <!-- Información del Usuario -->
             <div class="card">
               <div class="card-header">
@@ -494,8 +490,8 @@
                 <div class="form-group">
                   <label for="nuevoAdminNivel">Nivel de Acceso:</label>
                   <select id="nuevoAdminNivel" required>
-                    <option value="1">Admin Normal</option>
-                    <option value="2">Super Admin</option>
+                    <option value="1">Admin</option>
+                    <option value="2">Admin+</option>
                   </select>
                 </div>
                 <button type="submit" class="btn btn-success">
@@ -528,188 +524,6 @@
                     <!-- Datos cargados dinámicamente -->
                   </tbody>
                 </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Gestión de Brackets -->
-        <div id="brackets" class="tab-content">
-          <div class="content-grid">
-            <!-- Crear Nuevo Bracket -->
-            <div class="card">
-              <div class="card-header">
-                <h3><i class="fas fa-plus"></i> Crear Nuevo Bracket</h3>
-              </div>
-              <form id="formCrearBracket" class="form">
-                <div class="form-group">
-                  <label for="nuevoBracketNombre">Nombre del Bracket:</label>
-                  <input
-                    type="text"
-                    id="nuevoBracketNombre"
-                    required
-                    placeholder="Ej: Torneo Principal, Brackets Finales"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="nuevoBracketPuntos">Puntos para Ganar:</label>
-                  <input
-                    type="number"
-                    id="nuevoBracketPuntos"
-                    required
-                    min="1"
-                    max="10"
-                    value="3"
-                    placeholder="Puntos necesarios para ganar un partido"
-                  />
-                </div>
-                <button type="submit" class="btn btn-success">
-                  <i class="fas fa-plus"></i> Crear Bracket
-                </button>
-              </form>
-            </div>
-
-            <!-- Seleccionar Bracket -->
-            <div class="card">
-              <div class="card-header">
-                <h3><i class="fas fa-list"></i> Seleccionar Bracket</h3>
-                <button id="refreshBrackets" class="btn btn-outline">
-                  <i class="fas fa-sync-alt"></i> Actualizar
-                </button>
-              </div>
-              <div class="form">
-                <div class="form-group">
-                  <label for="bracketSeleccionado">Bracket:</label>
-                  <select id="bracketSeleccionado" required>
-                    <option value="">Cargando brackets...</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <!-- Información del Bracket -->
-            <div class="card">
-              <div class="card-header">
-                <h3>
-                  <i class="fas fa-info-circle"></i> Información del Bracket
-                </h3>
-              </div>
-              <div class="form">
-                <div class="info-grid">
-                  <div class="info-item">
-                    <label>Nombre:</label>
-                    <span id="nombreBracket">-</span>
-                  </div>
-                  <div class="info-item">
-                    <label>Ronda Actual:</label>
-                    <span id="rondaActual">-</span>
-                  </div>
-                  <div class="info-item">
-                    <label>Estado:</label>
-                    <span id="estadoBracket">-</span>
-                  </div>
-                  <div class="info-item">
-                    <label>Puntos para Ganar:</label>
-                    <span id="puntosParaGanar">-</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Estadísticas del Bracket -->
-            <div class="card">
-              <div class="card-header">
-                <h3><i class="fas fa-chart-bar"></i> Estadísticas</h3>
-              </div>
-              <div class="form">
-                <div class="bracket-stats">
-                  <div class="stat-card">
-                    <h4>Participantes</h4>
-                    <div class="stat-value" id="cantidadParticipantes">0</div>
-                  </div>
-                  <div class="stat-card">
-                    <h4>Tamaño del Bracket</h4>
-                    <div class="stat-value" id="tamanioBracket">0</div>
-                  </div>
-                  <div class="stat-card warning">
-                    <h4>BYEs Necesarios</h4>
-                    <div class="stat-value" id="byesNecesarios">0</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Agregar Participantes -->
-            <div class="card">
-              <div class="card-header">
-                <h3><i class="fas fa-user-plus"></i> Agregar Participantes</h3>
-              </div>
-              <div class="form">
-                <div class="form-group">
-                  <label for="usuarioParaBracket">Usuario:</label>
-                  <select id="usuarioParaBracket" required>
-                    <option value="">Cargando usuarios...</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="semillaParticipante">Semilla (opcional):</label>
-                  <input
-                    type="number"
-                    id="semillaParticipante"
-                    min="1"
-                    placeholder="Número de semilla"
-                  />
-                </div>
-                <button id="addParticipante" class="btn btn-primary">
-                  <i class="fas fa-plus"></i> Agregar al Bracket
-                </button>
-              </div>
-            </div>
-
-            <!-- Participantes Seleccionados -->
-            <div class="card card-full">
-              <div class="card-header">
-                <h3>
-                  <i class="fas fa-users"></i> Participantes Seleccionados
-                </h3>
-                <button id="confirmarParticipantes" class="btn btn-success">
-                  <i class="fas fa-check"></i> Confirmar Participantes
-                </button>
-              </div>
-              <div class="form">
-                <div id="participantesSeleccionados" class="participantes-list">
-                  <p class="no-data">No hay participantes seleccionados</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Visualización del Bracket -->
-            <div class="card card-full">
-              <div class="card-header">
-                <h3><i class="fas fa-project-diagram"></i> Brackets</h3>
-                <div class="bracket-controls">
-                  <button id="generarRonda1" class="btn btn-primary" disabled>
-                    <i class="fas fa-play"></i> Generar Primera Ronda
-                  </button>
-                  <button
-                    id="generarSiguienteRonda"
-                    class="btn btn-warning"
-                    disabled
-                  >
-                    <i class="fas fa-forward"></i> Generar Siguiente Ronda
-                  </button>
-                  <button
-                    id="finalizarBracket"
-                    class="btn btn-success"
-                    disabled
-                  >
-                    <i class="fas fa-flag-checkered"></i> Finalizar Bracket
-                  </button>
-                </div>
-              </div>
-              <div id="bracketVisualizacion" class="bracket-visualization">
-                <p class="no-data">
-                  Selecciona un bracket y genera los partidos
-                </p>
               </div>
             </div>
           </div>
@@ -775,14 +589,13 @@
     <script src="js/equipos.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/historial.js"></script>
-    <script src="js/brackets.js"></script>
 
     <footer class="footer">
       <div class="footer-content">
         <button id="viewHistory" class="btn btn-link">
           <i class="fas fa-history"></i> Ver Historial de Puntos
         </button>
-        <span class="footer-text">BeyBladers V region © 2025</span>
+        <span class="footer-text">BeyBladers V region © 2025-2026</span>
       </div>
     </footer>
   </body>

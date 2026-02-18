@@ -8,4 +8,3 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Exportar para usar en otros archivos
 window.supabaseClient = supabase;
 
-console.log('✅ Supabase client inicializado');

@@ -1,0 +1,36 @@
+---
+interface Props {
+  title: string;
+  icon?: string;
+  actions?: Array<{ label: string; onClick: string; variant?: string }>;
+}
+
+const { title, icon, actions } = Astro.props;
+---
+
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold text-gray-900">
+      {icon && <i class={`fas fa-${icon} mr-2`}></i>}
+      {title}
+    </h2>
+    {actions && (
+      <div class="flex gap-2">
+        {actions.map((action) => (
+          <button
+            class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              action.variant === 'danger'
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : action.variant === 'success'
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {action.label}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+  <slot />
+</div>

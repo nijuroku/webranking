@@ -1,0 +1,38 @@
+---
+interface Tab {
+  id: string;
+  label: string;
+  icon: string;
+  adminLevel?: number;
+}
+
+const tabs: Tab[] = [
+  { id: 'ranking-main', label: 'Ranking Main', icon: 'trophy' },
+  { id: 'ranking-extra', label: 'Ranking Extra', icon: 'gamepad' },
+  { id: 'equipos', label: 'Equipos', icon: 'shield-alt' },
+  { id: 'puntos', label: 'Plus', icon: 'plus-circle', adminLevel: 1 },
+  { id: 'gestion-usuarios', label: 'Usuarios', icon: 'user-cog', adminLevel: 1 },
+  { id: 'administradores', label: 'Admins', icon: 'user-shield', adminLevel: 2 },
+];
+---
+
+<nav class="bg-white border-b border-gray-200 sticky top-16 z-30">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex overflow-x-auto">
+      {tabs.map((tab) => (
+        <button
+          data-tab={tab.id}
+          class={`px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+            tab.id === 'ranking-main'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+          }`}
+          data-admin-level={tab.adminLevel}
+        >
+          <i class={`fas fa-${tab.icon} mr-2`}></i>
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  </div>
+</nav>

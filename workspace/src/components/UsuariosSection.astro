@@ -1,0 +1,336 @@
+---
+import Card from './Card.astro';
+import FormField from './FormField.astro';
+import Table from './Table.astro';
+---
+
+<div class="space-y-6">
+  <div class="grid md:grid-cols-2 gap-6">
+    <!-- Agregar Usuario -->
+    <Card title="Agregar Usuario" icon="user-plus">
+      <form id="formAgregarUsuario" class="space-y-4">
+        <FormField
+          label="Nombre:"
+          name="nuevoUsuarioNombre"
+          required
+          placeholder="Nombre completo del usuario"
+        />
+        <div class="mb-4">
+          <label for="nuevoUsuarioEquipo" class="block text-sm font-medium text-gray-700 mb-2">
+            Equipo:
+          </label>
+          <select
+            id="nuevoUsuarioEquipo"
+            name="nuevoUsuarioEquipo"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">-- Seleccionar Equipo --</option>
+            <option value="1">Equipo A</option>
+            <option value="2">Equipo B</option>
+            <option value="3">Equipo C</option>
+            <option value="4">Equipo D</option>
+            <option value="5">Equipo E</option>
+          </select>
+        </div>
+        <FormField
+          label="Puntos Iniciales (Main):"
+          name="nuevoUsuarioPuntos"
+          type="number"
+          value="0"
+        />
+        <div id="alertAgregarUsuario"></div>
+        <button
+          type="submit"
+          class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+        >
+          <i class="fas fa-plus mr-2"></i> Agregar Usuario
+        </button>
+      </form>
+    </Card>
+
+    <!-- Modificar Usuario -->
+    <Card title="Modificar Usuario" icon="user-edit">
+      <form id="formModificarUsuario" class="space-y-4">
+        <div class="mb-4">
+          <label for="selectUsuarioGestion" class="block text-sm font-medium text-gray-700 mb-2">
+            Seleccionar Usuario:
+          </label>
+          <select
+            id="selectUsuarioGestion"
+            name="selectUsuarioGestion"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">-- Seleccionar Usuario --</option>
+          </select>
+        </div>
+        <div id="usuarioInfo" style="display: none;" class="space-y-4">
+          <div class="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+            <div>
+              <label class="text-sm text-gray-600">ID Usuario:</label>
+              <p id="infoId" class="font-semibold">-</p>
+            </div>
+            <div>
+              <label class="text-sm text-gray-600">Posición:</label>
+              <p id="infoPosicion" class="font-semibold">-</p>
+            </div>
+            <div>
+              <label class="text-sm text-gray-600">Fecha Creación:</label>
+              <p id="infoCreacion" class="font-semibold">-</p>
+            </div>
+          </div>
+
+          <FormField
+            label="Nombre:"
+            name="editUsuarioNombre"
+            required
+          />
+          <div class="mb-4">
+            <label for="editUsuarioEquipo" class="block text-sm font-medium text-gray-700 mb-2">
+              Equipo:
+            </label>
+            <select
+              id="editUsuarioEquipo"
+              name="editUsuarioEquipo"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">-- Seleccionar Equipo --</option>
+              <option value="1">Equipo A</option>
+              <option value="2">Equipo B</option>
+              <option value="3">Equipo C</option>
+              <option value="4">Equipo D</option>
+              <option value="5">Equipo E</option>
+            </select>
+          </div>
+          <FormField
+            label="Puntos Main:"
+            name="editUsuarioPuntos"
+            type="number"
+            required
+          />
+
+          <div class="flex gap-2">
+            <button
+              id="guardarUsuario"
+              type="button"
+              class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              <i class="fas fa-save mr-2"></i> Guardar Cambios
+            </button>
+            <button
+              id="eliminarUsuario"
+              type="button"
+              class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
+            >
+              <i class="fas fa-trash mr-2"></i> Eliminar
+            </button>
+          </div>
+        </div>
+      </form>
+    </Card>
+  </div>
+
+  <!-- Lista de Usuarios -->
+  <Card title="Usuarios Registrados" icon="users">
+    <Table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Equipo</th>
+          <th>Puntos</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyUsuarios">
+        <tr>
+          <td colspan="5" class="text-center py-8 text-gray-500">
+            <i class="fas fa-spinner-third spin-slow mr-2"></i> Cargando usuarios...
+          </td>
+        </tr>
+      </tbody>
+    </Table>
+  </Card>
+</div>
+
+<script>
+  // Almacenar usuarios en sessionStorage
+  let usuarios = JSON.parse(sessionStorage.getItem('usuarios') || '[]');
+  const equiposMap = {
+    '1': 'Equipo A',
+    '2': 'Equipo B',
+    '3': 'Equipo C',
+    '4': 'Equipo D',
+    '5': 'Equipo E',
+  };
+
+  // Función para mostrar alertas
+  function showAlert(container, message, type = 'error') {
+    const alertDiv = document.createElement('div');
+    const bgColor = type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-green-50 border-green-200 text-green-800';
+    const icon = type === 'error' ? 'fa-times-circle' : 'fa-check-circle';
+    
+    alertDiv.innerHTML = `
+      <div class="p-3 border rounded-lg ${bgColor} text-sm">
+        <i class="fas ${icon} mr-2"></i>${message}
+      </div>
+    `;
+    
+    container.innerHTML = '';
+    container.appendChild(alertDiv);
+    
+    setTimeout(() => {
+      alertDiv.remove();
+    }, 4000);
+  }
+
+  // Cargar y mostrar usuarios en tabla
+  function loadUsuarios() {
+    const tbodyUsuarios = document.getElementById('tbodyUsuarios');
+    if (usuarios.length === 0) {
+      tbodyUsuarios.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center py-8 text-gray-500">
+            No hay usuarios registrados
+          </td>
+        </tr>
+      `;
+      
+      // Actualizar select de modificar usuario
+      document.getElementById('selectUsuarioGestion').innerHTML = '<option value="">-- Seleccionar Usuario --</option>';
+      return;
+    }
+
+    tbodyUsuarios.innerHTML = usuarios.map((user, idx) => `
+      <tr>
+        <td class="font-bold">${idx + 1}</td>
+        <td>${user.nombre}</td>
+        <td class="font-semibold text-blue-600">${equiposMap[user.equipoId] || 'N/A'}</td>
+        <td class="font-bold">${user.puntos}</td>
+        <td>
+          <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700" onclick="window.editarUsuario(${idx})">Editar</button>
+          <button class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 ml-2" onclick="window.eliminarUsuarioDe(${idx})">Eliminar</button>
+        </td>
+      </tr>
+    `).join('');
+
+    // Actualizar select de modificar usuario
+    const selectUsuario = document.getElementById('selectUsuarioGestion');
+    selectUsuario.innerHTML = '<option value="">-- Seleccionar Usuario --</option>' + usuarios.map((user, idx) => 
+      `<option value="${idx}">${user.nombre} - ${equiposMap[user.equipoId]}</option>`
+    ).join('');
+  }
+
+  // Función para editar usuario
+  window.editarUsuario = function(idx) {
+    const user = usuarios[idx];
+    const selectUsuario = document.getElementById('selectUsuarioGestion');
+    const usuarioInfo = document.getElementById('usuarioInfo');
+    
+    document.getElementById('infoId').textContent = idx + 1;
+    document.getElementById('infoPosicion').textContent = idx + 1;
+    document.getElementById('infoCreacion').textContent = user.fechaCreacion || new Date().toLocaleDateString();
+    
+    document.getElementById('editUsuarioNombre').value = user.nombre;
+    document.getElementById('editUsuarioEquipo').value = user.equipoId;
+    document.getElementById('editUsuarioPuntos').value = user.puntos;
+    
+    selectUsuario.value = idx;
+    usuarioInfo.style.display = 'block';
+    
+    document.getElementById('guardarUsuario').dataset.usuarioIdx = idx;
+  };
+
+  // Función para eliminar usuario
+  window.eliminarUsuarioDe = function(idx) {
+    if (confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+      usuarios.splice(idx, 1);
+      sessionStorage.setItem('usuarios', JSON.stringify(usuarios));
+      loadUsuarios();
+      document.getElementById('usuarioInfo').style.display = 'none';
+      showAlert(document.querySelector('[id="alertAgregarUsuario"]'), 'Usuario eliminado correctamente', 'success');
+    }
+  };
+
+  // Agregar usuario
+  document.getElementById('formAgregarUsuario').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const nombre = document.getElementById('nuevoUsuarioNombre').value.trim();
+    const equipoId = document.getElementById('nuevoUsuarioEquipo').value;
+    const puntos = parseInt(document.getElementById('nuevoUsuarioPuntos').value) || 0;
+    const alertContainer = document.getElementById('alertAgregarUsuario');
+
+    // Validaciones
+    if (!nombre) {
+      showAlert(alertContainer, 'El nombre es requerido');
+      return;
+    }
+
+    if (!equipoId) {
+      showAlert(alertContainer, 'Debe seleccionar un equipo');
+      return;
+    }
+
+    // Crear nuevo usuario
+    const nuevoUsuario = {
+      nombre,
+      equipoId,
+      puntos,
+      fechaCreacion: new Date().toLocaleDateString(),
+    };
+
+    usuarios.push(nuevoUsuario);
+    sessionStorage.setItem('usuarios', JSON.stringify(usuarios));
+    
+    // Limpiar formulario
+    document.getElementById('formAgregarUsuario').reset();
+    
+    // Recargar tabla
+    loadUsuarios();
+    
+    // Mostrar mensaje
+    showAlert(alertContainer, `Usuario "${nombre}" agregado correctamente a ${equiposMap[equipoId]}`, 'success');
+  });
+
+  // Guardar cambios de usuario
+  document.getElementById('guardarUsuario').addEventListener('click', function() {
+    const idxAttr = this.getAttribute('data-usuario-idx');
+    if (!idxAttr) {
+      showAlert(document.querySelector('[id="alertAgregarUsuario"]'), 'Por favor selecciona un usuario primero');
+      return;
+    }
+    
+    const idx = parseInt(idxAttr);
+    const nombre = document.getElementById('editUsuarioNombre').value.trim();
+    const equipoId = document.getElementById('editUsuarioEquipo').value;
+    const puntos = parseInt(document.getElementById('editUsuarioPuntos').value) || 0;
+
+    if (!nombre) {
+      showAlert(document.querySelector('[id="alertAgregarUsuario"]'), 'El nombre es requerido');
+      return;
+    }
+
+    if (!equipoId) {
+      showAlert(document.querySelector('[id="alertAgregarUsuario"]'), 'Debe seleccionar un equipo');
+      return;
+    }
+
+    usuarios[idx] = {
+      ...usuarios[idx],
+      nombre,
+      equipoId,
+      puntos,
+    };
+
+    sessionStorage.setItem('usuarios', JSON.stringify(usuarios));
+    loadUsuarios();
+    document.getElementById('usuarioInfo').style.display = 'none';
+    showAlert(document.querySelector('[id="alertAgregarUsuario"]'), 'Usuario actualizado correctamente', 'success');
+  });
+
+  // Cargar usuarios al iniciar
+  loadUsuarios();
+</script>

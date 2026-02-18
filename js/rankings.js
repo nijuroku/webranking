@@ -33,7 +33,15 @@ class RankingManager {
 
   async loadRankingExtra() {
     try {
-      this.showLoading("extra");
+      // ⬇️ Agregar esta verificación
+        if (!window.supabaseClient) {
+            console.error("❌ Supabase client no está disponible");
+            window.authManager?.showNotification("Error de conexión a la base de datos", "error");
+            this.hideLoading("extra");
+            return;
+        }
+        
+        this.showLoading("extra");
 
       const evento =
         document.getElementById("eventoNombre").value || this.currentEvento;

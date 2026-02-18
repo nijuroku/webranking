@@ -1,0 +1,32 @@
+---
+---
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <slot />
+    </table>
+  </div>
+</div>
+
+<style>
+  table {
+    border-collapse: collapse;
+  }
+
+  :global(thead) {
+    @apply bg-gray-100 border-b border-gray-200;
+  }
+
+  :global(thead th) {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider;
+  }
+
+  :global(tbody td) {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+
+  :global(tbody tr:hover) {
+    @apply bg-gray-50;
+  }
+</style>

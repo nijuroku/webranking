@@ -1,0 +1,40 @@
+---
+interface Props {
+  userName?: string;
+  userBadge?: string;
+}
+
+const { userName = 'Usuario', userBadge = 'Admin' } = Astro.props;
+---
+
+<header class="bg-white shadow-md sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo Section -->
+      <div class="flex items-center gap-4">
+        <div class="text-3xl">🏆</div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Sistema de Clasificación</h1>
+          <p class="text-gray-600 text-sm">Gestión de rankings y equipos</p>
+        </div>
+      </div>
+
+      <!-- User Info -->
+      <div class="flex items-center gap-6">
+        <div class="text-right">
+          <p class="text-sm font-medium text-gray-900" id="userName">{userName}</p>
+          <span class="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold" id="userBadge">{userBadge}</span>
+        </div>
+        <button id="logoutBtn" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm">
+          <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  header {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+</style>

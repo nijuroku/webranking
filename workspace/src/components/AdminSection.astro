@@ -1,0 +1,76 @@
+---
+import Card from './Card.astro';
+import FormField from './FormField.astro';
+import Table from './Table.astro';
+---
+
+<div class="space-y-6">
+  <div class="grid md:grid-cols-2 gap-6">
+    <!-- Crear Administrador -->
+    <Card title="Crear Administrador" icon="user-plus">
+      <form id="formCrearAdmin" class="space-y-4">
+        <FormField
+          label="Usuario:"
+          name="nuevoAdminUsuario"
+          required
+          placeholder="Nombre de usuario"
+        />
+        <FormField
+          label="Contraseña:"
+          name="nuevoAdminPassword"
+          type="password"
+          required
+          placeholder="Contraseña"
+        />
+        <FormField
+          label="Nombre Completo:"
+          name="nuevoAdminNombre"
+          placeholder="Nombre completo"
+        />
+        <div class="mb-4">
+          <label for="nuevoAdminNivel" class="block text-sm font-medium text-gray-700 mb-2">
+            Nivel de Acceso:
+          </label>
+          <select
+            id="nuevoAdminNivel"
+            name="nuevoAdminNivel"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="1">Admin</option>
+            <option value="2">Admin+</option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+        >
+          <i class="fas fa-plus mr-2"></i> Crear Administrador
+        </button>
+      </form>
+    </Card>
+  </div>
+
+  <!-- Lista de Administradores -->
+  <Card title="Administradores" icon="users-cog">
+    <Table>
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Nombre</th>
+          <th>Nivel</th>
+          <th>Estado</th>
+          <th>Fecha Creación</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyAdmins">
+        <tr>
+          <td colspan="6" class="text-center py-8 text-gray-500">
+            <i class="fas fa-spinner-third spin-slow mr-2"></i> Cargando administradores...
+          </td>
+        </tr>
+      </tbody>
+    </Table>
+  </Card>
+</div>

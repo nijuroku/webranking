@@ -1,0 +1,61 @@
+---
+import Card from './Card.astro';
+import FormField from './FormField.astro';
+---
+
+<div class="grid md:grid-cols-2 gap-6">
+  <Card title="Sumar Puntos Main" icon="plus-circle">
+    <form id="formSumarPuntosMain" class="space-y-4">
+      <FormField
+        label="Usuario:"
+        name="usuarioPuntosMain"
+        type="select"
+        required
+      />
+      <FormField
+        label="Puntos a Sumar:"
+        name="cantidadPuntosMain"
+        type="number"
+        required
+        placeholder="Cantidad de puntos"
+      />
+      <button
+        type="submit"
+        class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+      >
+        <i class="fas fa-check mr-2"></i> Sumar Puntos
+      </button>
+    </form>
+  </Card>
+
+  <Card title="Sumar Puntos Extra" icon="star">
+    <form id="formSumarPuntosExtra" class="space-y-4">
+      <FormField
+        label="Evento:"
+        name="eventoPuntos"
+        required
+        placeholder="Nombre del evento"
+        value="Evento For Fun"
+      />
+      <FormField
+        label="Usuario:"
+        name="usuarioPuntosExtra"
+        type="select"
+        required
+      />
+      <FormField
+        label="Puntos a Sumar:"
+        name="cantidadPuntosExtra"
+        type="number"
+        required
+        placeholder="Cantidad de puntos"
+      />
+      <button
+        type="submit"
+        class="w-full bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 transition-colors font-medium"
+      >
+        <i class="fas fa-check mr-2"></i> Sumar Puntos Extra
+      </button>
+    </form>
+  </Card>
+</div>
